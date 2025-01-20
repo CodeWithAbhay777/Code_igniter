@@ -1,0 +1,54 @@
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background: 
+      linear-gradient(to right, white 1px, transparent 1px),
+      linear-gradient(to bottom, white 1px, transparent 1px),
+      linear-gradient(45deg, white 1px, transparent 1px),
+      linear-gradient(-45deg, white 1px, transparent 1px);
+    background-color: #121212; /* Dark background */
+    background-size: 100px 100px; /* Gap of 100px */
+  }
+  
+  #wrapper-grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto;
+    
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6); /* Slightly transparent black for overlay */
+    border: 1px solid #555; /* Optional border for visualization */
+  }
+  
+  
+  
+
+
+ /* #wrapper-grid {
+    position: relative;
+    top:0;
+    left : 0;
+    width:100%;
+    height:100vh;
+    
+    background: linear-gradient(to right, rgba(255 , 255 ,255, 0.1) 1px , transparent 1px),
+    linear-gradient(to bottom , rgba(255 , 255 , 255 , 0.1) 1px , transparent 1px);
+
+    background-size: 50px 50px ;
+    pointer-events: none;
+    z-index: -1;
+} */
+
+#wrapper-grid::before {
+    content: "";
+    position: absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: radial-gradient(circle , transparent , rgba(0,0,0,1));
+    pointer-events: none;
+    z-index: -1;
+} 
