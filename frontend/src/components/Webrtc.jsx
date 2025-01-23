@@ -58,14 +58,14 @@ const Webrtc = ({ screenWidthRef, socket, webrtcVisibility, roomId, username, ne
                     });
                 });
 
-                socket.on("user-connected", (userId) => {
-                    console.log(`${userId} connected`);
-                    connectToNewUser(userId, myStream.current);
-                });
+                // socket.on("user-connected", (userId) => {
+                //     console.log(`${userId} connected`);
+                //     connectToNewUser(userId, myStream.current);
+                // });
 
-                socket.on("user-disconnected", (userId) => {
-                    if (peers.current[userId]) peers.current[userId].close();
-                });
+                // socket.on("user-disconnected", (userId) => {
+                //     if (peers.current[userId]) peers.current[userId].close();
+                // });
 
 
 
@@ -76,9 +76,19 @@ const Webrtc = ({ screenWidthRef, socket, webrtcVisibility, roomId, username, ne
 
         initializeStream();
 
-        myPeer.current.on("open", (id) => {
-            socket.emit("join-room", roomId, id);
-        });
+        if (newUser) {
+            console.log(`Connecting to new user: ${newUser}`);
+            connectToNewUser(newUser, myStream.current);
+        }
+
+        if (userExit) {
+            if (peers.current[userExit]){
+                peers.current[userExit].close();
+            }
+        }
+        // myPeer.current.on("open", (id) => {
+        //     // socket.emit("join-room", roomId, id);
+        // });
 
         return () => {
             myPeer.current.disconnect();
@@ -87,7 +97,7 @@ const Webrtc = ({ screenWidthRef, socket, webrtcVisibility, roomId, username, ne
             socket.off("user-disconnected");
         }
 
-    }, [socket]);
+    }, [socket , newUser , userExit]);
 
 
 
@@ -123,6 +133,10 @@ const Webrtc = ({ screenWidthRef, socket, webrtcVisibility, roomId, username, ne
         //     videoGrid.current.append(video);
         // }
         videoGrid.current.append(video);
+
+
+
+
 
     }
 

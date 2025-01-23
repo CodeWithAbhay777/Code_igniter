@@ -19,12 +19,12 @@ const io = new Server(server, {
 
 
 io.on("connection", (socket) => {
-  
 
-  socket.on("join-room", (roomId, userId) => {
+
+  socket.on("join-room", (roomId, user) => {
     socket.join(roomId);
-    console.log(`User ${userId} joined room : ${roomId}`);
-    socket.to(roomId).emit("user-connected", userId);
+    console.log(`User ${user} joined room : ${roomId}`);
+    socket.to(roomId).emit("user-connected", user , socket.id);
 
     //getting editor value
     socket.on("change-input", (inputValue, username, languageValue) => {
@@ -32,13 +32,14 @@ io.on("connection", (socket) => {
     });
 
     //chat functionality 
-    socket.on("chat-message" , (username , message) => {
-      socket.to(roomId).emit("get-message" , username , message);
+    socket.on("chat-message", (username, message) => {
+      console.log(`USERNAME : ${username} , MESSAGE : ${message}`);
+      socket.to(roomId).emit("get-message", username, message);
     });
 
 
     socket.on("disconnect", () => {
-      socket.to(roomId).emit("user-disconnected", userId);
+      socket.to(roomId).emit("user-disconnected", user , socket.id);
     })
   })
 })

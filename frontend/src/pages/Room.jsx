@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import Webrtc from '../components/Webrtc';
 import Whiteboard from '../components/Whiteboard';
@@ -13,6 +13,10 @@ import { BiLoaderAlt } from "react-icons/bi";
 import { starterCode } from '../util/starterCode';
 import { FaChalkboardTeacher } from "react-icons/fa";
 import { FaShareNodes } from "react-icons/fa6";
+
+
+
+
 import { FaEyeSlash } from "react-icons/fa";
 import { IoEyeSharp } from "react-icons/io5";
 import { IoMdInformationCircle } from "react-icons/io";
@@ -27,7 +31,8 @@ const Room = () => {
 
 
 
-  const [socket] = useState(() => io("http://localhost:3000"));
+  // const [socket] = useState(() => io("http://localhost:3000"));
+  const socket = useMemo(() => io("http://localhost:3000"), [])
   const [languageValue, setLanguageValue] = useState(languageSupport[0].language);
   const [inputValue, setInputValue] = useState(starterCode[languageValue]);
   const [resetBtnClr, setRestBtnClr] = useState(false);
@@ -42,12 +47,13 @@ const Room = () => {
   const { roomId } = useParams();
   const location = useLocation();
   const editorRef = useRef();
-  // const socket = useRef();
+  
   const screenWidthRef = useRef(null);
   const isError = useRef(false);
-  const username = location.state?.username;
 
-  console.log("rendered");
+  const username = location.state?.username;
+  // console.log(location.state , username);
+  // console.log("rendered");
 
   useEffect(() => {
     setInputValue(starterCode[languageValue])
@@ -67,23 +73,25 @@ const Room = () => {
 
 
 
-    currentSocket.on("user-connected", (userId) => {
+    currentSocket.on("user-connected", (userId , socketid) => {
 
       toast.info(`${userId} joined the room.`);
       // setIsSocketReady(true);
-      setNewUser(userId);
+      setNewUser(socketid);
     });
 
-    currentSocket.on("user-disconnected", (userId) => {
-      console.log(userId);
-      toast.info(`${userId} left the room.`);
-      setUserExit(userId);
-    })
+
 
     currentSocket.on("new-input-value", (inputValue, languageValue, username) => {
       setIsUpdating(true);
       setLanguageValue(languageValue);
       setInputValue(inputValue);
+    })
+
+    currentSocket.on("user-disconnected", (userId ,socketid) => {
+      
+      toast.info(`${userId} left the room.`);
+      setUserExit(socketid);
     })
 
     return () => {
@@ -217,13 +225,13 @@ const Room = () => {
           <FaShareNodes className='hover:text-gray-300' />
 
           <AiFillThunderbolt />
-          
+
           <IoMdChatbubbles onClick={chatBoxIconClicked} className={`${chatBoxVisibility ? `text-gray-400` : `text-white`} hover:text-gray-300`} />
 
           {
             webrtcVisibility ? <IoEyeSharp className='hover:text-gray-300' onClick={videoWindowVisibility} /> : <FaEyeSlash className='text-gray-400 hover:text-gray-300' onClick={videoWindowVisibility} />
           }
-          
+
           <IoMdInformationCircle className='hover:text-gray-300' />
 
           <IoExit className='text-red-500 hover:text-red-700' />

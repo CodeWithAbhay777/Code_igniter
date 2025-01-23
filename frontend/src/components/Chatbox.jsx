@@ -1,11 +1,12 @@
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { IoSend } from "react-icons/io5";
 
 const Chatbox = ({ chatBoxVisibility, socket, username }) => {
 
   const [message, setMessage] = useState("");
   const [newMessage, setNewMessage] = useState([]);
+  const socketref = useRef(socket);
 
   const sendMessage = (e) => {
 
@@ -18,13 +19,25 @@ const Chatbox = ({ chatBoxVisibility, socket, username }) => {
       }]
     })
 
-    socket.emit("chat-message", username, message);
+    socketref.current.emit("chat-message", username, message);
 
     setMessage("");
 
   }
 
-  // const getMessage = useCallback((username, message) => {
+  const getMessage = useCallback((username, message) => {
+    setNewMessage((prev) => {
+      return [...prev, {
+        isAuthor: false,
+        displayMessage: message,
+        sendBy: username
+      }]
+    })
+  }, [])
+
+  // const getMessage = (username, message) => {
+
+
   //   setNewMessage((prev) => {
   //     return [...prev, {
   //       isAuthor: false,
@@ -32,29 +45,24 @@ const Chatbox = ({ chatBoxVisibility, socket, username }) => {
   //       sendBy: username
   //     }]
   //   })
-  // }, [])
+
+
+  // }
 
   useEffect(() => {
-    const getMessage = (username, message) => {
-
-
-      setNewMessage((prev) => {
-        return [...prev, {
-          isAuthor: false,
-          displayMessage: message,
-          sendBy: username
-        }]
-      })
-
-
+    
+    const handleMessage = (username , message) => {
+      console.log("Message received by client:", username, message);
+        getMessage(username , message);
     }
 
-    socket.on("get-message", getMessage);
+    socketref.current.on("get-message", handleMessage);
 
     return () => {
-      socket.off("get-message", getMessage);
+      console.log("Cleaning up 'get-message' listener");
+      socketref.current.off("get-message", handleMessage);
     }
-  }, [socket])
+  }, [getMessage])
 
   return (
     <div className={`fixed ${chatBoxVisibility ? `right-0 top-0` : `right-[-100rem] top-0 `}  h-full w-[25rem] lg:w-[25rem] md:w-[20rem] sm:w-[18rem] bg-gray-950 rounded shadow-[0px_0px_20px_rgba(0,0,0,1)] transition-all ease-in-out delay-3050`}>
