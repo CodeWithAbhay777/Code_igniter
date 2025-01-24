@@ -22,21 +22,21 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
 
 
-  socket.on("join-room", (roomId, user) => {
+  socket.on("join-room", (roomId, {id , username}) => {
 
     if (!rooms.roomId) rooms[roomId] = [];
     rooms[roomId].push(socket.id);
 
     socket.join(roomId);
-    console.log(`User ${user} joined room : ${roomId}`);
-    socket.to(roomId).emit("user-connected", user);
+    console.log(`User ${username} joined room: ${roomId} with Peer ID: ${id}`);
+    socket.to(roomId).emit("user-connected", { id, username });
 
-    //getting editor value
+    
     socket.on("change-input", (inputValue, username, languageValue) => {
       socket.to(roomId).emit("new-input-value", inputValue, languageValue, username);
     });
 
-    //chat functionality 
+    
     socket.on("chat-message", (username, message) => {
       console.log(`USERNAME : ${username} , MESSAGE : ${message}`);
       socket.to(roomId).emit("get-message", username, message);
@@ -45,7 +45,7 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect", () => {
       rooms[roomId] = rooms[roomId].filter((id) => id !== socket.id );
-      socket.to(roomId).emit("user-disconnected",  user);
+      socket.to(roomId).emit("user-disconnected",  { id, username });
     });
   });
 });

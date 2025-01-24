@@ -92,7 +92,7 @@ const Room = () => {
         myStream.current = stream;
 
         
-        addVideoStream(myVideo.current, stream);
+        addVideoStream(createVideoElement(true), stream);
 
         
         myPeer.current.on('call', (call) => {
@@ -107,7 +107,22 @@ const Room = () => {
     };
 
     initWebRTC();
-  }, []);
+
+    myPeer.current.on('open', (id) => {
+      socket.emit('join-room', roomId, { id, username }); // Send Peer ID + username
+    });
+
+    myPeer.current.on('call', (call) => {
+      call.answer(myStream.current); // Share local stream with caller
+      const video = createVideoElement();
+      call.on('stream', (userVideoStream) => addVideoStream(video, userVideoStream));
+    });
+
+    return () => {
+      socket.disconnect();
+      if (myPeer.current) myPeer.current.destroy();
+    };
+  }, [roomId , username]);
 
 
   //socket useEffect work
@@ -116,14 +131,14 @@ const Room = () => {
     
 
 
-    socket.emit("join-room", roomId, username);
+   
 
-    socket.on("user-connected", (userId) => {
+    socket.on("user-connected", ({id , username}) => {
 
-      toast.info(`${userId} joined the room.`);
+      toast.info(`${username} joined the room.`);
       
-      console.log(`New user connected - UserID: ${userId}`);
-      connectToNewUser(userId, myStream.current);
+      console.log(`${username} connected with Peer ID: ${id}`);
+      connectToNewUser(id, myStream.current);
       
     });
 
@@ -135,25 +150,22 @@ const Room = () => {
       setInputValue(inputValue);
     })
 
-    socket.on("user-disconnected", (userId) => {
-      console.log(`User disconnected: ${userId}`);
-      toast.info(`${userId} left the room.`);
-      if (peers.current[userId]) peers.current[userId].close();
+    socket.on("user-disconnected", ({id , username}) => {
+      console.log(`User disconnected: ${username}`);
+      toast.info(`${username} left the room.`);
+      if (peers.current[id]) peers.current[id].close();
     })
 
-    myPeer.current.on('open', (id) => {
-      socket.emit('join-room', roomId, id); 
-    });
-
+    
     return () => {
-      socket.disconnect();
-      socket.off();
-      if (myPeer.current) myPeer.current.destroy();
+      socket.off('user-connected');
+      socket.off('user-disconnected');
+      
       
     }
 
 
-  }, [username, roomId])
+  }, [])
 
   useEffect(() => {
 
@@ -168,18 +180,30 @@ const Room = () => {
 
   const connectToNewUser = (userId, stream) => {
     const call = myPeer.current.call(userId, stream); 
-    const video = document.createElement('video');
+    const video = createVideoElement();
 
     call.on('stream', (userVideoStream) => addVideoStream(video, userVideoStream)); 
     call.on('close', () => video.remove()); 
     peers.current[userId] = call; 
   };
 
+  const createVideoElement = (muted = false) => {
+    const video = document.createElement('video');
+    video.muted = muted;
+    video.style.height = '11rem';
+    video.style.width = '18rem';
+    video.style.borderRadius = '8px';
+    video.style.objectFit = 'cover';
+    video.style.margin = '0.5rem';
+    return video;
+  };
+
 
   const addVideoStream = (video, stream) => {
    
-    const existingVideo = Array.from(videoGrid.current.children).find((v) => v.srcObject === stream);
-    if (existingVideo) return;
+    if (Array.from(videoGrid.current.children).some((v) => v.srcObject === stream)) {
+      return; 
+    }
 
     video.srcObject = stream;
     video.addEventListener('loadedmetadata', () => video.play());
