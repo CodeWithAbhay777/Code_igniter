@@ -7,6 +7,7 @@ import cors from "cors"
 
 const app = express();
 const PORT = 3000;
+let rooms = {};
 const server = http.createServer(app);
 app.use(cors());
 
@@ -22,9 +23,13 @@ io.on("connection", (socket) => {
 
 
   socket.on("join-room", (roomId, user) => {
+
+    if (!rooms.roomId) rooms[roomId] = [];
+    rooms[roomId].push(socket.id);
+
     socket.join(roomId);
     console.log(`User ${user} joined room : ${roomId}`);
-    socket.to(roomId).emit("user-connected", user , socket.id);
+    socket.to(roomId).emit("user-connected", user);
 
     //getting editor value
     socket.on("change-input", (inputValue, username, languageValue) => {
@@ -39,10 +44,11 @@ io.on("connection", (socket) => {
 
 
     socket.on("disconnect", () => {
-      socket.to(roomId).emit("user-disconnected", user , socket.id);
-    })
-  })
-})
+      rooms[roomId] = rooms[roomId].filter((id) => id !== socket.id );
+      socket.to(roomId).emit("user-disconnected",  user);
+    });
+  });
+});
 
 server.listen(3000, () => {
   console.log(`Server running on http://localhost:${PORT}`);

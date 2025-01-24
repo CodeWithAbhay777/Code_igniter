@@ -7,97 +7,117 @@ import { FaMicrophone } from "react-icons/fa6";
 import { IoVideocam } from "react-icons/io5";
 import { IoVideocamOff } from "react-icons/io5";
 
+const Webrtc = ({ videoGrid, webrtcVisibility , myStream , screenWidthRef }) => {
 
-
-const Webrtc = ({ screenWidthRef, socket, webrtcVisibility, roomId, username, newUser, userExit }) => {
+// const Webrtc = ({ screenWidthRef, socket, webrtcVisibility, roomId, username, newUser, userExit }) => {
     const [micStatus, setMicStatus] = useState(true);
     const [webcamStatus, setWebcamStatus] = useState(true);
-    const videoGrid = useRef();
-    const myPeer = useRef();
-    const myVideo = useRef();
-    const myStream = useRef();
-    const peers = useRef({});
+    // const videoGrid = useRef();
+    // const myPeer = useRef();
+    // const myVideo = useRef();
+    // const myStream = useRef();
+    // const peers = useRef({});
 
-    useEffect(() => {
+    // useEffect(() => {
 
-        if (!socket) {
-            console.log("socket not found");
-            return;
-        }
+    //     if (!socket ) {
+    //         console.log("Socket, Peer, or Stream not initialized.");
+    //         return;
+    //     }
 
-        myPeer.current = new Peer(undefined, {
-            host: "0.peerjs.com",
-            secure: true,
-            port: 443,
-        });
+    //     myPeer.current = new Peer(undefined, {
+    //         host: "0.peerjs.com",
+    //         secure: true,
+    //         port: 443,
+    //     });
 
-        myVideo.current = document.createElement('video');
-        myVideo.current.style.height = "11rem";
-        myVideo.current.style.width = "18rem";
-        myVideo.current.style.borderRadius = "8px"; 
-        myVideo.current.style.objectFit = "cover";
-        myVideo.current.style.margin = "0.5rem";   
-        myVideo.current.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)"; 
-        myVideo.current.muted = true;
+    //     myVideo.current = document.createElement('video');
+    //     myVideo.current.style.height = "11rem";
+    //     myVideo.current.style.width = "18rem";
+    //     myVideo.current.style.borderRadius = "8px";
+    //     myVideo.current.style.objectFit = "cover";
+    //     myVideo.current.style.margin = "0.5rem";
+    //     myVideo.current.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
+    //     myVideo.current.muted = true;
 
-        const initializeStream = async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: true,
-                    audio: true,
-                });
+    //     const initializeStream = async () => {
+    //         try {
+    //             const stream = await navigator.mediaDevices.getUserMedia({
+    //                 video: true,
+    //                 audio: true,
+    //             });
 
-                myStream.current = stream;
-                addVideoStream(myVideo.current, stream);
+    //             if (!stream) {
+    //                 console.error("Stream initialization failed");
+                    
+    //             }
 
-                myPeer.current.on("call", (call) => {
-                    call.answer(stream);
-                    const video = document.createElement("video");
-                    call.on("stream", (userVideoStream) => {
-                        addVideoStream(video, userVideoStream);
-                    });
-                });
+    //             myStream.current = stream;
+    //             addVideoStream(myVideo.current, stream);
 
-                // socket.on("user-connected", (userId) => {
-                //     console.log(`${userId} connected`);
-                //     connectToNewUser(userId, myStream.current);
-                // });
+    //             myPeer.current.on("call", (call) => {
+    //                 console.log("Receiving call from peer");
+    //                 // call.answer(stream);
+    //                 call.answer(myStream.current);
+    //                 const video = document.createElement("video");
+    //                 call.on("stream", (userVideoStream) => {
+    //                     console.log("Receiving remote stream");
+    //                     addVideoStream(video, userVideoStream);
+    //                 });
 
-                // socket.on("user-disconnected", (userId) => {
-                //     if (peers.current[userId]) peers.current[userId].close();
-                // });
+    //                 call.on("close", () => {
+    //                     console.log("Call closed");
+    //                     video.remove();
+    //                 });
+
+    //                 // call.on("error", (err) => {
+    //                 //     console.error("Error during call:", err);
+    //                 // });
+
+    //             });
+
+    //             // socket.on("user-connected", (userId) => {
+    //             //     console.log(`${userId} connected`);
+    //             //     connectToNewUser(userId, myStream.current);
+    //             // });
+
+    //             // socket.on("user-disconnected", (userId) => {
+    //             //     if (peers.current[userId]) peers.current[userId].close();
+    //             // });
 
 
 
-            } catch (error) {
-                alert(error);
-            }
-        }
+    //         } catch (error) {
+    //             console.error("Error initializing stream:", error);
+    //             alert(error);
+    //         }
+    //     }
 
-        initializeStream();
+    //     initializeStream();
 
-        if (newUser) {
-            console.log(`Connecting to new user: ${newUser}`);
-            connectToNewUser(newUser, myStream.current);
-        }
+    //     if (newUser && newUser !== myPeer.current.id) {
+    //         console.log(`New user detected: ${newUser}`);
+    //         connectToNewUser(newUser, myStream.current);
+    //     }
 
-        if (userExit) {
-            if (peers.current[userExit]){
-                peers.current[userExit].close();
-            }
-        }
-        // myPeer.current.on("open", (id) => {
-        //     // socket.emit("join-room", roomId, id);
-        // });
+    //     if (userExit) {
+    //         if (peers.current[userExit]) {
+    //             peers.current[userExit].close();
+    //         }
+    //         delete peers.current[userExit];
+    //     }
+    //     // myPeer.current.on("open", (id) => {
+    //     //     // socket.emit("join-room", roomId, id);
+    //     // });
 
-        return () => {
-            myPeer.current.disconnect();
-            myPeer.current = null;
-            socket.off("user-connected");
-            socket.off("user-disconnected");
-        }
+    //     return () => {
+    //         if (myPeer.current) myPeer.current.disconnect();
+    //         myPeer.current = null;
+    //         socket.off("user-connected");
+    //         socket.off("user-disconnected");
+    //     }
 
-    }, [socket , newUser , userExit]);
+    // }, [socket, newUser, userExit]);
 
 
 
@@ -106,44 +126,59 @@ const Webrtc = ({ screenWidthRef, socket, webrtcVisibility, roomId, username, ne
     // }, [userExit])
 
 
-    const connectToNewUser = (userId, stream) => {
-        const call = myPeer.current.call(userId, stream);
-        const video = document.createElement("video");
-        video.style.height = "11rem";
-        video.style.width = "18rem";
-        video.style.borderRadius = "8px"; 
-        video.style.objectFit = "cover";
-        video.style.margin = "0.5rem";   
-        video.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)"; 
-        call.on("stream", (userVideoStream) => {
-            addVideoStream(video, userVideoStream);
-        });
-        call.on("close", () => {
-            video.remove();
-        });
-        peers.current[userId] = call;
-    }
+    // const connectToNewUser = (userId, stream) => {
 
-    const addVideoStream = (video, stream) => {
-        video.srcObject = stream;
-        video.addEventListener("loadedmetadata", () => {
-            video.play();
-        })
-        // if (webrtcVisibility && videoGrid.current) {
-        //     videoGrid.current.append(video);
-        // }
-        videoGrid.current.append(video);
+    //     if (peers.current[userId]) return;
 
+    //     console.log(`Connecting to: ${userId}`);
 
+    //     const call = myPeer.current.call(userId, stream);
 
+    //     if (!call) {
+    //         console.error(`Call failed to ${userId}`);
+    //         return;
+    //     }
 
+    //     const video = document.createElement("video");
+    //     video.style.height = "11rem";
+    //     video.style.width = "18rem";
+    //     video.style.borderRadius = "8px";
+    //     video.style.objectFit = "cover";
+    //     video.style.margin = "0.5rem";
+    //     video.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
+    //     call.on("stream", (userVideoStream) => {
+    //         console.log(`Receiving stream from ${userId}`);
+    //         // const video = document.createElement("video");
+    //         addVideoStream(video, userVideoStream);
+    //     });
+    //     call.on("close", () => {
+    //         video.remove();
+    //     });
+    //     peers.current[userId] = call;
+    // }
 
-    }
+    // const addVideoStream = (video, stream) => {
+
+    //     const existingVideo = Array.from(videoGrid.current.children).find(
+    //         (v) => v.srcObject === stream
+    //     );
+    //     if (existingVideo) return;
+
+    //     video.srcObject = stream;
+    //     video.addEventListener("loadedmetadata", () => {
+    //         video.play();
+    //     })
+    //     // if (webrtcVisibility && videoGrid.current) {
+    //     //     videoGrid.current.append(video);
+    //     // }
+    //     videoGrid.current.append(video);
+
+    // }
 
 
     const micStatusChange = (e) => {
-        if (myStream.current) {
-            const audioTrack = myStream.current.getAudioTracks()[0];
+        if (myStream) {
+            const audioTrack = myStream.getAudioTracks()[0];
             audioTrack.enabled = !audioTrack.enabled;
             setMicStatus(audioTrack.enabled);
         }
@@ -151,8 +186,8 @@ const Webrtc = ({ screenWidthRef, socket, webrtcVisibility, roomId, username, ne
     }
     const webcamStatusChange = (e) => {
 
-        if (myStream.current) {
-            const videoTrack = myStream.current.getVideoTracks()[0];
+        if (myStream) {
+            const videoTrack = myStream.getVideoTracks()[0];
             videoTrack.enabled = !videoTrack.enabled;
             setWebcamStatus(videoTrack.enabled);
         }

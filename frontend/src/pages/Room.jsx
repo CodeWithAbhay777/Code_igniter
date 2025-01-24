@@ -13,7 +13,7 @@ import { BiLoaderAlt } from "react-icons/bi";
 import { starterCode } from '../util/starterCode';
 import { FaChalkboardTeacher } from "react-icons/fa";
 import { FaShareNodes } from "react-icons/fa6";
-
+import Peer from "peerjs";
 
 
 
@@ -47,61 +47,113 @@ const Room = () => {
   const { roomId } = useParams();
   const location = useLocation();
   const editorRef = useRef();
-  
+
   const screenWidthRef = useRef(null);
   const isError = useRef(false);
 
   const username = location.state?.username;
-  // console.log(location.state , username);
-  // console.log("rendered");
+  
+
+  //webrtc_work
+  const videoGrid = useRef();
+  const myPeer = useRef();
+  const myVideo = useRef();
+  const myStream = useRef();
+  const peers = useRef({});
+
+
+
+
 
   useEffect(() => {
     setInputValue(starterCode[languageValue])
   }, [languageValue])
 
 
-  //socket useEffect work
+  //webrtc_setup_useEffect
   useEffect(() => {
-    // socket.current = io("http://localhost:3000");
-    // const currentSocket = socket.current;
-    const currentSocket = socket;
 
-
-    currentSocket.emit("join-room", roomId, username);
-
-
-
-
-
-    currentSocket.on("user-connected", (userId , socketid) => {
-
-      toast.info(`${userId} joined the room.`);
-      // setIsSocketReady(true);
-      setNewUser(socketid);
+    myPeer.current = new Peer(undefined, {
+      host: '0.peerjs.com',
+      secure: true,
+      port: 443,
     });
 
+    
+    myVideo.current = document.createElement('video');
+    myVideo.current.muted = true; 
+    
+    const initWebRTC = async () => {
+      
 
 
-    currentSocket.on("new-input-value", (inputValue, languageValue, username) => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        myStream.current = stream;
+
+        
+        addVideoStream(myVideo.current, stream);
+
+        
+        myPeer.current.on('call', (call) => {
+          call.answer(stream); 
+          const video = document.createElement('video');
+          call.on('stream', (userVideoStream) => addVideoStream(video, userVideoStream));
+        });
+      } catch (error) {
+        console.error('Error accessing media devices:', error);
+        toast.error('Could not access camera/microphone!');
+      }
+    };
+
+    initWebRTC();
+  }, []);
+
+
+  //socket useEffect work
+  useEffect(() => {
+    
+    
+
+
+    socket.emit("join-room", roomId, username);
+
+    socket.on("user-connected", (userId) => {
+
+      toast.info(`${userId} joined the room.`);
+      
+      console.log(`New user connected - UserID: ${userId}`);
+      connectToNewUser(userId, myStream.current);
+      
+    });
+
+    
+
+    socket.on("new-input-value", (inputValue, languageValue, username) => {
       setIsUpdating(true);
       setLanguageValue(languageValue);
       setInputValue(inputValue);
     })
 
-    currentSocket.on("user-disconnected", (userId ,socketid) => {
-      
+    socket.on("user-disconnected", (userId) => {
+      console.log(`User disconnected: ${userId}`);
       toast.info(`${userId} left the room.`);
-      setUserExit(socketid);
+      if (peers.current[userId]) peers.current[userId].close();
     })
 
+    myPeer.current.on('open', (id) => {
+      socket.emit('join-room', roomId, id); 
+    });
+
     return () => {
-      currentSocket.disconnect();
-      currentSocket.off();
-      // socket.current.disconnect();
+      socket.disconnect();
+      socket.off();
+      if (myPeer.current) myPeer.current.destroy();
+      
     }
 
 
-  }, [username, roomId, socket])
+  }, [username, roomId])
 
   useEffect(() => {
 
@@ -112,6 +164,27 @@ const Room = () => {
     setIsUpdating(false);
 
   }, [inputValue, languageValue]);
+
+
+  const connectToNewUser = (userId, stream) => {
+    const call = myPeer.current.call(userId, stream); 
+    const video = document.createElement('video');
+
+    call.on('stream', (userVideoStream) => addVideoStream(video, userVideoStream)); 
+    call.on('close', () => video.remove()); 
+    peers.current[userId] = call; 
+  };
+
+
+  const addVideoStream = (video, stream) => {
+   
+    const existingVideo = Array.from(videoGrid.current.children).find((v) => v.srcObject === stream);
+    if (existingVideo) return;
+
+    video.srcObject = stream;
+    video.addEventListener('loadedmetadata', () => video.play());
+    videoGrid.current.append(video);
+  };
 
 
   const focusing = (e) => {
@@ -239,7 +312,9 @@ const Room = () => {
         </motion.div>
 
         //webrtc
-        <Webrtc screenWidthRef={screenWidthRef} socket={socket} webrtcVisibility={webrtcVisibility} roomId={roomId} username={username} newUser={newUser} userExit={userExit} />
+        {/* <Webrtc screenWidthRef={screenWidthRef} socket={socket} webrtcVisibility={webrtcVisibility} roomId={roomId} username={username} newUser={newUser} userExit={userExit} /> */}
+
+        <Webrtc webrtcVisibility = {webrtcVisibility} videoGrid = {videoGrid} myStream = {myStream.current} screenWidthRef={screenWidthRef}/>
 
         <Chatbox chatBoxVisibility={chatBoxVisibility} socket={socket} username={username} />
 
