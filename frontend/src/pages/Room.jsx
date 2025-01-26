@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { useLocation, useParams } from 'react-router-dom'
+import { useLocation, useParams , useNavigate } from 'react-router-dom'
 import Webrtc from '../components/Webrtc';
 import Whiteboard from '../components/Whiteboard';
 import { io } from 'socket.io-client';
@@ -33,6 +33,7 @@ const Room = () => {
 
   // const [socket] = useState(() => io("http://localhost:3000"));
   const socket = useMemo(() => io("http://localhost:3000"), [])
+  const navigate = useNavigate();
   const [languageValue, setLanguageValue] = useState(languageSupport[0].language);
   const [inputValue, setInputValue] = useState(starterCode[languageValue]);
   const [resetBtnClr, setRestBtnClr] = useState(false);
@@ -52,7 +53,14 @@ const Room = () => {
   const isError = useRef(false);
 
   const username = location.state?.username;
+  useEffect(() => {
+    if (!location.state || !location.state.username ) {
+      navigate(`/ready` , {state : {roomId}});
+    }
+  },[])
+
   
+
 
   //webrtc_work
   const videoGrid = useRef();
@@ -60,10 +68,6 @@ const Room = () => {
   const myVideo = useRef();
   const myStream = useRef();
   const peers = useRef({});
-
-
-
-
 
   useEffect(() => {
     setInputValue(starterCode[languageValue])
@@ -79,24 +83,24 @@ const Room = () => {
       port: 443,
     });
 
-    
+
     myVideo.current = document.createElement('video');
-    myVideo.current.muted = true; 
-    
+    myVideo.current.muted = true;
+
     const initWebRTC = async () => {
-      
+
 
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         myStream.current = stream;
 
-        
+
         addVideoStream(createVideoElement(true), stream);
 
-        
+
         myPeer.current.on('call', (call) => {
-          call.answer(stream); 
+          call.answer(stream);
           const video = document.createElement('video');
           call.on('stream', (userVideoStream) => addVideoStream(video, userVideoStream));
         });
@@ -122,27 +126,27 @@ const Room = () => {
       socket.disconnect();
       if (myPeer.current) myPeer.current.destroy();
     };
-  }, [roomId , username]);
+  }, [roomId, username]);
 
 
   //socket useEffect work
   useEffect(() => {
-    
-    
 
 
-   
 
-    socket.on("user-connected", ({id , username}) => {
+
+
+
+    socket.on("user-connected", ({ id, username }) => {
 
       toast.info(`${username} joined the room.`);
-      
+
       console.log(`${username} connected with Peer ID: ${id}`);
       connectToNewUser(id, myStream.current);
-      
+
     });
 
-    
+
 
     socket.on("new-input-value", (inputValue, languageValue, username) => {
       setIsUpdating(true);
@@ -150,18 +154,18 @@ const Room = () => {
       setInputValue(inputValue);
     })
 
-    socket.on("user-disconnected", ({id , username}) => {
+    socket.on("user-disconnected", ({ id, username }) => {
       console.log(`User disconnected: ${username}`);
       toast.info(`${username} left the room.`);
       if (peers.current[id]) peers.current[id].close();
     })
 
-    
+
     return () => {
       socket.off('user-connected');
       socket.off('user-disconnected');
-      
-      
+
+
     }
 
 
@@ -179,12 +183,12 @@ const Room = () => {
 
 
   const connectToNewUser = (userId, stream) => {
-    const call = myPeer.current.call(userId, stream); 
+    const call = myPeer.current.call(userId, stream);
     const video = createVideoElement();
 
-    call.on('stream', (userVideoStream) => addVideoStream(video, userVideoStream)); 
-    call.on('close', () => video.remove()); 
-    peers.current[userId] = call; 
+    call.on('stream', (userVideoStream) => addVideoStream(video, userVideoStream));
+    call.on('close', () => video.remove());
+    peers.current[userId] = call;
   };
 
   const createVideoElement = (muted = false) => {
@@ -200,9 +204,9 @@ const Room = () => {
 
 
   const addVideoStream = (video, stream) => {
-   
+
     if (Array.from(videoGrid.current.children).some((v) => v.srcObject === stream)) {
-      return; 
+      return;
     }
 
     video.srcObject = stream;
@@ -274,7 +278,7 @@ const Room = () => {
             })}
           </select>
 
-          <div id='editing-area' className='w-full min-h-[90%] bg-gray-900 flex-grow my-2 p-[7px] rounded'>
+          <div id='editing-area' className='w-full h-full bg-gray-900 flex-grow my-2 p-[7px] rounded overflow-hidden flex-grow'>
             <Editor
               height="100%"
               theme="vs-dark"
@@ -338,7 +342,7 @@ const Room = () => {
         //webrtc
         {/* <Webrtc screenWidthRef={screenWidthRef} socket={socket} webrtcVisibility={webrtcVisibility} roomId={roomId} username={username} newUser={newUser} userExit={userExit} /> */}
 
-        <Webrtc webrtcVisibility = {webrtcVisibility} videoGrid = {videoGrid} myStream = {myStream.current} screenWidthRef={screenWidthRef}/>
+        <Webrtc webrtcVisibility={webrtcVisibility} videoGrid={videoGrid} myStream={myStream.current} screenWidthRef={screenWidthRef} />
 
         <Chatbox chatBoxVisibility={chatBoxVisibility} socket={socket} username={username} />
 
