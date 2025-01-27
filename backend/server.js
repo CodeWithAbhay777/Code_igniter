@@ -1,15 +1,30 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import express from "express"
 import http from "http"
+import OpenAI from "openai";
 import { Server } from "socket.io"
+import mainRouter from "./routes/index.js";
 import cors from "cors"
 
 
 
 const app = express();
-const PORT = 3000;
-let rooms = {};
-const server = http.createServer(app);
+const PORT = process.env.PORT || 3000;
 app.use(cors());
+app.use(express.urlencoded({ extended : true }));
+app.use(express.json());
+const secretKey = process.env.OPENAI_API_KEY ; 
+let rooms = {};
+let messages = [];
+const server = http.createServer(app);
+
+
+
+
+const openai = new OpenAI ({
+  apiKey : secretKey,
+});
 
 const io = new Server(server, {
   cors: {
@@ -17,6 +32,17 @@ const io = new Server(server, {
     methods: ["GET", "POST", "PUT", "DELETE"],
   },
 });
+
+app.use((req, res, next) => {
+  console.log(`[${req.method}] ${req.url} - Headers: `, req.headers);
+  console.log(`Body: `, req.body);
+  next();
+});
+
+
+
+app.use("/api/v1" , mainRouter);
+
 
 
 io.on("connection", (socket) => {
