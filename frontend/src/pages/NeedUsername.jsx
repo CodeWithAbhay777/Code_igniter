@@ -10,7 +10,7 @@ const NeedUsername = () => {
 
     const submitInfo = (e) => {
         if (username || roomID) {
-            navigate(`/room/:${roomID}` , {state : {username}})
+            navigate(`/room/${roomID}` , {state : {username}})
         }
     }
     
