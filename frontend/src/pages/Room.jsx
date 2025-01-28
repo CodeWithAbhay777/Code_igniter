@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { useLocation, useParams , useNavigate } from 'react-router-dom'
+import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import Webrtc from '../components/Webrtc';
+
 import Whiteboard from '../components/Whiteboard';
 import { io } from 'socket.io-client';
 import Editor from '@monaco-editor/react';
@@ -12,6 +13,7 @@ import { motion } from "framer-motion";
 import { BiLoaderAlt } from "react-icons/bi";
 import { starterCode } from '../util/starterCode';
 import { FaChalkboardTeacher } from "react-icons/fa";
+import { BsStars } from "react-icons/bs";
 import { FaShareNodes } from "react-icons/fa6";
 import Peer from "peerjs";
 
@@ -22,9 +24,10 @@ import { IoEyeSharp } from "react-icons/io5";
 import { IoMdInformationCircle } from "react-icons/io";
 import { IoExit } from "react-icons/io5";
 import { IoMdChatbubbles } from "react-icons/io";
-import { AiFillThunderbolt } from "react-icons/ai";
+
 import Chatbox from '../components/Chatbox';
 import '../App.css'
+import ChatAI from '../components/ChatAI';
 
 
 const Room = () => {
@@ -41,10 +44,12 @@ const Room = () => {
   const [newUser, setNewUser] = useState("");
   const [userExit, setUserExit] = useState("");
   const [output, setOutput] = useState([`Click "Run" to see the output here`])
+  const [accessCodeForTask , setAccessCodeForTask] = useState('');
   const [btnLoad, setBtnLoad] = useState(false);
   const [webrtcVisibility, setWebrtcVisibility] = useState(true);
   const [whiteBoardVisibility, setWhiteBoardVisibility] = useState(false);
   const [chatBoxVisibility, setChatBoxVisibility] = useState(false);
+  const [assistantChatBoxVisibility, setAssistantChatBoxVisibility] = useState(false);
   const { roomId } = useParams();
   const location = useLocation();
   const editorRef = useRef();
@@ -54,12 +59,12 @@ const Room = () => {
 
   const username = location.state?.username;
   useEffect(() => {
-    if (!location.state || !location.state.username ) {
-      navigate(`/ready` , {state : {roomId}});
+    if (!location.state || !location.state.username) {
+      navigate(`/ready`, { state: { roomId } });
     }
-  },[])
+  }, [])
 
-  
+
 
 
   //webrtc_work
@@ -294,22 +299,37 @@ const Room = () => {
         <div id="output-area" className=' h-full w-full lg:w-1/2 md:w-1/2 sm:w-full p-2 flex flex-col'>
 
           <div id='btns-area' className=' h-[3rem] w-full p-2 flex justify-between items-center my-1'>
-            <button className='h-[2.5rem] w-[10rem] bg-gray-800 rounded-md text-white hover:bg-gray-900 cursor-pointer' onClick={getOutput}>
+
+            <div className='flex justify-between items-center '>
+            <button className='h-[2.5rem] w-[10rem] bg-gray-800 rounded-md text-white hover:bg-gray-700 cursor-pointer' onClick={getOutput}>
               {btnLoad ? <BiLoaderAlt className='text-xl m-auto animate-spin' /> : "Run"}
             </button>
+
+
+            {isError.current ? <button className='bg-gradient-to-r from-green-900 to-green-600 text-white h-[2.5rem] w-[10rem] rounded-md flex justify-center items-center mx-2'><BsStars />&nbsp;Ask Assistant</button> : null}
+            </div>
+            
+
+
             <button
               onClick={() => {
+                isError.current = false;
                 setOutput([`Click "Run" to see the output here`]);
+                
                 setRestBtnClr(false);
               }
               }
-              className='h-[2.5rem] w-[10rem] bg-gray-800 rounded-md text-white hover:bg-gray-900 cursor-pointer' >Clear</button>
+              className='h-[2.5rem] w-[10rem] bg-gray-800 rounded-md text-white hover:bg-gray-700 cursor-pointer' >Clear</button>
           </div>
 
           <div id="output-display-block" className={`bg-gray-900 h-[90%] w-full rounded p-4 overflow-auto ${isError.current ? `text-red-500 border border-red-500` : `text-gray-300 border border-green-300`} ${!resetBtnClr ? `border-0 text-gray-300` : null} `}>
             {output.map((val, i) => {
               return <p key={i}>{val}</p>
             })}
+
+
+            
+            
 
           </div>
 
@@ -325,7 +345,8 @@ const Room = () => {
 
           <FaShareNodes className='hover:text-gray-300' />
 
-          <AiFillThunderbolt />
+
+          <BsStars onClick={() => setAssistantChatBoxVisibility((prev) => !prev)} className={`${assistantChatBoxVisibility ? `text-gray-400` : `text-white`} hover:text-gray-300`}/>
 
           <IoMdChatbubbles onClick={chatBoxIconClicked} className={`${chatBoxVisibility ? `text-gray-400` : `text-white`} hover:text-gray-300`} />
 
@@ -340,14 +361,20 @@ const Room = () => {
         </motion.div>
 
         //webrtc
-        {/* <Webrtc screenWidthRef={screenWidthRef} socket={socket} webrtcVisibility={webrtcVisibility} roomId={roomId} username={username} newUser={newUser} userExit={userExit} /> */}
-
         <Webrtc webrtcVisibility={webrtcVisibility} videoGrid={videoGrid} myStream={myStream.current} screenWidthRef={screenWidthRef} />
 
+
+
+
+        //chatbox
         <Chatbox chatBoxVisibility={chatBoxVisibility} socket={socket} username={username} />
 
-        <Whiteboard whiteBoardVisibility={whiteBoardVisibility} roomId={roomId} />
+        //assistantchatbox
+        <ChatAI assistantChatBoxVisibility={assistantChatBoxVisibility} username={username}/>
 
+
+        //whiteboard
+        <Whiteboard whiteBoardVisibility={whiteBoardVisibility} roomId={roomId} />
 
 
       </div>

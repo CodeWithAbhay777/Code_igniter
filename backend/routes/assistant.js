@@ -32,7 +32,7 @@ router.post('/assistant' , async (req , res) => {
 
           if (response) {
             let reply = response.choices[0].message.content;
-            console.log(reply);
+            
             res.status(200).json({success : true , msg : reply});
           }
           else {
