@@ -50,6 +50,7 @@ const Room = () => {
   const [whiteBoardVisibility, setWhiteBoardVisibility] = useState(false);
   const [chatBoxVisibility, setChatBoxVisibility] = useState(false);
   const [assistantChatBoxVisibility, setAssistantChatBoxVisibility] = useState(false);
+  const [accessabilityTask , setAccessabilityTask] = useState({acc_taskCode : null , acc_taskError: null , acc_call : false});
   const { roomId } = useParams();
   const location = useLocation();
   const editorRef = useRef();
@@ -247,6 +248,11 @@ const Room = () => {
 
       const data = await executeCode(languageValue, inputValue);
       isError.current = data.run.stderr === "" ? false : true;
+      if (data.run.signal) {
+        if (data.run.signal === 'SIGKILL'){
+          toast.error('Load exeeded: please decrease the values')
+        }
+      }
       data.run.output.split('\n');
       setOutput([...data.run.output.split('\n'), "-------code-execution-completed-------"]);
 
@@ -261,6 +267,18 @@ const Room = () => {
       setRestBtnClr(true)
     }
 
+  }
+
+  const settingDataForAccessabilityCall = () => {
+    setAccessabilityTask({
+      acc_taskCode : inputValue,
+      acc_taskError : output,
+      acc_call : true
+    });
+
+    setAssistantChatBoxVisibility((prev) => {
+      return true;
+    });
   }
 
 
@@ -306,7 +324,7 @@ const Room = () => {
             </button>
 
 
-            {isError.current ? <button className='bg-gradient-to-r from-green-900 to-green-600 text-white h-[2.5rem] w-[10rem] rounded-md flex justify-center items-center mx-2'><BsStars />&nbsp;Ask Assistant</button> : null}
+            {isError.current ? <button onClick={settingDataForAccessabilityCall} className='bg-gradient-to-r from-green-900 to-green-600 hover:border-2 text-white h-[2.5rem] w-[10rem] rounded-md flex justify-center items-center mx-2'><BsStars />&nbsp;Ask Assistant</button> : null}
             </div>
             
 
@@ -322,7 +340,7 @@ const Room = () => {
               className='h-[2.5rem] w-[10rem] bg-gray-800 rounded-md text-white hover:bg-gray-700 cursor-pointer' >Clear</button>
           </div>
 
-          <div id="output-display-block" className={`bg-gray-900 h-[90%] w-full rounded p-4 overflow-auto ${isError.current ? `text-red-500 border border-red-500` : `text-gray-300 border border-green-300`} ${!resetBtnClr ? `border-0 text-gray-300` : null} `}>
+          <div id="output-display-block" className={`bg-gray-900 h-[90%] w-full rounded p-4 overflow-auto break-words ${isError.current ? `text-red-500 border border-red-500` : `text-gray-300 border border-green-300`} ${!resetBtnClr ? `border-0 text-gray-300` : null} `}>
             {output.map((val, i) => {
               return <p key={i}>{val}</p>
             })}
@@ -370,7 +388,7 @@ const Room = () => {
         <Chatbox chatBoxVisibility={chatBoxVisibility} socket={socket} username={username} />
 
         //assistantchatbox
-        <ChatAI assistantChatBoxVisibility={assistantChatBoxVisibility} username={username}/>
+        <ChatAI assistantChatBoxVisibility={assistantChatBoxVisibility} username={username} accessabilityTask={accessabilityTask} setAccessabilityTask={setAccessabilityTask}/>
 
 
         //whiteboard
