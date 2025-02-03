@@ -148,6 +148,7 @@ const Room = () => {
       toast.info(`${username} joined the room.`);
 
       console.log(`${username} connected with Peer ID: ${id}`);
+
       connectToNewUser(id, myStream.current);
 
     });
@@ -188,7 +189,7 @@ const Room = () => {
   }, [inputValue, languageValue]);
 
 
-  const connectToNewUser = (userId, stream) => {
+  const connectToNewUser = (userId, stream , username) => {
     const call = myPeer.current.call(userId, stream);
     const video = createVideoElement();
 
@@ -197,14 +198,19 @@ const Room = () => {
     peers.current[userId] = call;
   };
 
-  const createVideoElement = (muted = false) => {
+  const createVideoElement = ( muted = false) => {
+    
+    
     const video = document.createElement('video');
+  
     video.muted = muted;
-    video.style.height = '11rem';
-    video.style.width = '18rem';
+    video.style.height = '10rem';
+    video.style.width = '17rem';
     video.style.borderRadius = '8px';
     video.style.objectFit = 'cover';
     video.style.margin = '0.5rem';
+
+    
     return video;
   };
 
@@ -379,7 +385,7 @@ const Room = () => {
         </motion.div>
 
         //webrtc
-        <Webrtc webrtcVisibility={webrtcVisibility} videoGrid={videoGrid} myStream={myStream.current} screenWidthRef={screenWidthRef} />
+        <Webrtc webrtcVisibility={webrtcVisibility} videoGrid={videoGrid} myStream={myStream} screenWidthRef={screenWidthRef} />
 
 
 
