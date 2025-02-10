@@ -3,7 +3,10 @@ dotenv.config();
 import express from "express"
 import http from "http"
 import OpenAI from "openai";
-import { Server } from "socket.io"
+import { Server } from "socket.io";
+import cookieSession from 'cookie-session';
+import passport from 'passport';
+import passportSetup from "./middlewares/passport.js";
 import mainRouter from "./routes/index.js";
 import cors from "cors"
 
@@ -12,6 +15,19 @@ import cors from "cors"
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(cors());
+
+//cookie-session
+const sessionOptions = {
+  name : "session",
+  keys: ["Avenger16#"],
+  maxAge: 14 * 24 * 60 * 60 * 1000,
+}
+
+app.use(cookieSession(sessionOptions));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(express.urlencoded({ extended : true }));
 app.use(express.json());
 const secretKey = process.env.OPENAI_API_KEY ; 
