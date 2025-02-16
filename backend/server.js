@@ -1,12 +1,13 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import 'dotenv/config';
 import express from "express"
 import http from "http"
 import OpenAI from "openai";
+import db from "./db.js";
 import { Server } from "socket.io";
 import cookieSession from 'cookie-session';
 import passport from 'passport';
-import passportSetup from "./middlewares/passport.js";
+import User from "./models/User.js";
+// import passportSetup from "./middlewares/passport.js";
 import mainRouter from "./routes/index.js";
 import cors from "cors"
 
@@ -23,8 +24,11 @@ const sessionOptions = {
   maxAge: 14 * 24 * 60 * 60 * 1000,
 }
 
-app.use(cookieSession(sessionOptions));
+//db connection
+db().then(res => console.log("DB connected"))
+.catch(err => console.log(err));
 
+app.use(cookieSession(sessionOptions));
 app.use(passport.initialize());
 app.use(passport.session());
 

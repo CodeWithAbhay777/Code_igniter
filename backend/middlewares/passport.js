@@ -1,26 +1,33 @@
-import GoogleStrategy from 'passport-google-oauth20';
-GoogleStrategy.Strategy;
-import passport from 'passport';
+import passport from "passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import User from "../models/User.js";
 
-passport.use(
-    new GoogleStrategy(
-        {
-            clientID : process.env.CLIENT_ID,
-            clientSecret : process.env.CLIENT_SECRET,
-            callbackURL : "/auth/google/callback",
-            scope : ["profile" , "email"],
-        } , 
+passport.use(new GoogleStrategy({
+    clientID: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+    callbackURL: '/auth/google/callback',
+    passReqToCallback: true
+},
 
-        function(accessToken , refreshToken , profile , callback) {
-            callback(null , profile);
+    async (req, accessToken, refreshToken, profile, done) => {
+        try {
+            let user = await User.findOne({ googleId: profile.id });
+
+            if (!user) {
+                user = new User({
+                    googleId: profile.id,
+                    email: profile.emails[0].value,
+                    displayName: profile.displayName,
+                    avatar: profile.photos[0].value
+                });
+
+                await user.save();
+            }
+
+            return done(null, user);
+        } catch (err) {
+            return done(err, null);
         }
-    )
-);
+    }
 
-passport.serializeUser((user , done) => {
-    done(null , user);
-});
-
-passport.deserializeUser((user , done) => {
-    done(null , user);
-})
+))

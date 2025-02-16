@@ -5,7 +5,7 @@ import OpenAI from "openai";
 
 
 const router = express.Router();
-const secretKey = process.env.OPENAI_API_KEY ; 
+const secretKey = process.env.OPENAI_API_KEY; 
 let messages = [];
 
 

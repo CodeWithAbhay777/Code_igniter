@@ -44,13 +44,20 @@ const Room = () => {
   const [newUser, setNewUser] = useState("");
   const [userExit, setUserExit] = useState("");
   const [output, setOutput] = useState([`Click "Run" to see the output here`])
-  const [accessCodeForTask , setAccessCodeForTask] = useState('');
+  const [accessCodeForTask, setAccessCodeForTask] = useState('');
   const [btnLoad, setBtnLoad] = useState(false);
   const [webrtcVisibility, setWebrtcVisibility] = useState(true);
   const [whiteBoardVisibility, setWhiteBoardVisibility] = useState(false);
   const [chatBoxVisibility, setChatBoxVisibility] = useState(false);
   const [assistantChatBoxVisibility, setAssistantChatBoxVisibility] = useState(false);
-  const [accessabilityTask , setAccessabilityTask] = useState({acc_taskCode : null , acc_taskError: null , acc_call : false});
+  const [accessabilityTask, setAccessabilityTask] = useState({ acc_taskCode: null, acc_taskError: null, acc_call: false });
+
+
+  //trail
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+
+
   const { roomId } = useParams();
   const location = useLocation();
   const editorRef = useRef();
@@ -63,7 +70,30 @@ const Room = () => {
     if (!location.state || !location.state.username) {
       navigate(`/ready`, { state: { roomId } });
     }
+
+    try {
+
+      const token = localStorage.getItem('codeigniter_token');
+      if (token) {
+        const decoded = jwt.decode(token);
+        console.log(decoded);
+        setIsLoggedIn(true);
+      }
+      else {
+        console.log("no token found");
+      }
+
+    } catch (error) {
+      console.log(err);
+    }
   }, [])
+
+
+  const handleGoogleLogin = () => {
+    window.location.href = `http://localhost:3000/api/v1/auth/google?state=${roomId}`;
+  };
+
+
 
 
 
@@ -189,7 +219,7 @@ const Room = () => {
   }, [inputValue, languageValue]);
 
 
-  const connectToNewUser = (userId, stream , username) => {
+  const connectToNewUser = (userId, stream, username) => {
     const call = myPeer.current.call(userId, stream);
     const video = createVideoElement();
 
@@ -198,11 +228,11 @@ const Room = () => {
     peers.current[userId] = call;
   };
 
-  const createVideoElement = ( muted = false) => {
-    
-    
+  const createVideoElement = (muted = false) => {
+
+
     const video = document.createElement('video');
-  
+
     video.muted = muted;
     video.style.height = '10rem';
     video.style.width = '17rem';
@@ -210,7 +240,7 @@ const Room = () => {
     video.style.objectFit = 'cover';
     video.style.margin = '0.5rem';
 
-    
+
     return video;
   };
 
@@ -255,7 +285,7 @@ const Room = () => {
       const data = await executeCode(languageValue, inputValue);
       isError.current = data.run.stderr === "" ? false : true;
       if (data.run.signal) {
-        if (data.run.signal === 'SIGKILL'){
+        if (data.run.signal === 'SIGKILL') {
           toast.error('Load exeeded: please decrease the values')
         }
       }
@@ -277,9 +307,9 @@ const Room = () => {
 
   const settingDataForAccessabilityCall = () => {
     setAccessabilityTask({
-      acc_taskCode : inputValue,
-      acc_taskError : output,
-      acc_call : true
+      acc_taskCode: inputValue,
+      acc_taskError: output,
+      acc_call: true
     });
 
     setAssistantChatBoxVisibility((prev) => {
@@ -307,6 +337,13 @@ const Room = () => {
             })}
           </select>
 
+            {
+              isLoggedIn ? console.log(isLoggedIn) : <button onClick={handleGoogleLogin} 
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+              Sign in with google</button>
+            }
+
+
           <div id='editing-area' className='w-full h-full bg-gray-900 flex-grow my-2 p-[7px] rounded overflow-hidden flex-grow'>
             <Editor
               height="100%"
@@ -325,21 +362,21 @@ const Room = () => {
           <div id='btns-area' className=' h-[3rem] w-full p-2 flex justify-between items-center my-1'>
 
             <div className='flex justify-between items-center '>
-            <button className='h-[2.5rem] w-[10rem] bg-gray-800 rounded-md text-white hover:bg-gray-700 cursor-pointer' onClick={getOutput}>
-              {btnLoad ? <BiLoaderAlt className='text-xl m-auto animate-spin' /> : "Run"}
-            </button>
+              <button className='h-[2.5rem] w-[10rem] bg-gray-800 rounded-md text-white hover:bg-gray-700 cursor-pointer' onClick={getOutput}>
+                {btnLoad ? <BiLoaderAlt className='text-xl m-auto animate-spin' /> : "Run"}
+              </button>
 
 
-            {isError.current ? <button onClick={settingDataForAccessabilityCall} className='bg-gradient-to-r from-green-900 to-green-600 hover:border-2 text-white h-[2.5rem] w-[10rem] rounded-md flex justify-center items-center mx-2'><BsStars />&nbsp;Ask Assistant</button> : null}
+              {isError.current ? <button onClick={settingDataForAccessabilityCall} className='bg-gradient-to-r from-green-900 to-green-600 hover:border-2 text-white h-[2.5rem] w-[10rem] rounded-md flex justify-center items-center mx-2'><BsStars />&nbsp;Ask Assistant</button> : null}
             </div>
-            
+
 
 
             <button
               onClick={() => {
                 isError.current = false;
                 setOutput([`Click "Run" to see the output here`]);
-                
+
                 setRestBtnClr(false);
               }
               }
@@ -352,8 +389,8 @@ const Room = () => {
             })}
 
 
-            
-            
+
+
 
           </div>
 
@@ -370,7 +407,7 @@ const Room = () => {
           <FaShareNodes className='hover:text-gray-300' />
 
 
-          <BsStars onClick={() => setAssistantChatBoxVisibility((prev) => !prev)} className={`${assistantChatBoxVisibility ? `text-gray-400` : `text-white`} hover:text-gray-300`}/>
+          <BsStars onClick={() => setAssistantChatBoxVisibility((prev) => !prev)} className={`${assistantChatBoxVisibility ? `text-gray-400` : `text-white`} hover:text-gray-300`} />
 
           <IoMdChatbubbles onClick={chatBoxIconClicked} className={`${chatBoxVisibility ? `text-gray-400` : `text-white`} hover:text-gray-300`} />
 
@@ -394,7 +431,7 @@ const Room = () => {
         <Chatbox chatBoxVisibility={chatBoxVisibility} socket={socket} username={username} />
 
         //assistantchatbox
-        <ChatAI assistantChatBoxVisibility={assistantChatBoxVisibility} username={username} accessabilityTask={accessabilityTask} setAccessabilityTask={setAccessabilityTask}/>
+        <ChatAI assistantChatBoxVisibility={assistantChatBoxVisibility} username={username} accessabilityTask={accessabilityTask} setAccessabilityTask={setAccessabilityTask} />
 
 
         //whiteboard
