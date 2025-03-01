@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState , useContext} from 'react'
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import Webrtc from '../components/Webrtc';
 
@@ -17,7 +17,7 @@ import { BsStars } from "react-icons/bs";
 import { FaShareNodes } from "react-icons/fa6";
 import Peer from "peerjs";
 
-
+import {socket} from '../util/socket.js';
 
 import { FaEyeSlash } from "react-icons/fa";
 import { IoEyeSharp } from "react-icons/io5";
@@ -32,10 +32,10 @@ import ChatAI from '../components/ChatAI';
 
 const Room = () => {
 
-
+  
 
   // const [socket] = useState(() => io("http://localhost:3000"));
-  const socket = useMemo(() => io("http://localhost:3000"), [])
+  // const socket = useMemo(() => io("http://localhost:3000"), [])
   const navigate = useNavigate();
   const [languageValue, setLanguageValue] = useState(languageSupport[0].language);
   const [inputValue, setInputValue] = useState(starterCode[languageValue]);
@@ -65,32 +65,36 @@ const Room = () => {
   const screenWidthRef = useRef(null);
   const isError = useRef(false);
 
-  const username = location.state?.username;
-  useEffect(() => {
-    if (!location.state || !location.state.username) {
-      navigate(`/ready`, { state: { roomId } });
-    }
+  const [username , setUsername] = useState(
+    location.state?.username || new URLSearchParams(location.search).get('username')
+);
 
-    try {
 
-      const token = localStorage.getItem('codeigniter_token');
-      if (token) {
-        const decoded = jwt.decode(token);
-        console.log(decoded);
-        setIsLoggedIn(true);
-      }
-      else {
-        console.log("no token found");
-      }
 
-    } catch (error) {
-      console.log(err);
-    }
-  }, [])
+
+
+  // useEffect(() => {
+  //   const params = new URLSearchParams(location.search);
+  //   const token = params.get('token');
+  //   const urlUsername = params.get('username');
+
+  //   if (token) {
+  //     localStorage.setItem('authToken' , token);
+      
+  //     navigate(`/room/${roomId}` , {
+  //       state : { username : urlUsername },
+  //       replace : true
+  //     });
+  //   }
+
+  //   else if (!location.state?.username && !urlUsername) {
+  //     navigate(`/ready` , {state : {roomId}});
+  //   }
+  // }, []);
 
 
   const handleGoogleLogin = () => {
-    window.location.href = `http://localhost:3000/api/v1/auth/google?state=${roomId}`;
+    window.location.href = `http://localhost:3000/api/v1/auth/google?roomId=${roomId}&username=${username}`;
   };
 
 
@@ -117,6 +121,7 @@ const Room = () => {
       host: '0.peerjs.com',
       secure: true,
       port: 443,
+      
     });
 
 
@@ -149,11 +154,11 @@ const Room = () => {
     initWebRTC();
 
     myPeer.current.on('open', (id) => {
-      socket.emit('join-room', roomId, { id, username }); // Send Peer ID + username
+      socket.emit('join-room', roomId, { id, username }); 
     });
 
     myPeer.current.on('call', (call) => {
-      call.answer(myStream.current); // Share local stream with caller
+      call.answer(myStream.current); 
       const video = createVideoElement();
       call.on('stream', (userVideoStream) => addVideoStream(video, userVideoStream));
     });
@@ -169,7 +174,23 @@ const Room = () => {
   useEffect(() => {
 
 
+    //trail
+    const params = new URLSearchParams(location.search);
+    const token = params.get('token');
+    const urlUsername = params.get('username');
 
+    if (token) {
+      localStorage.setItem('authToken' , token);
+      
+      navigate(`/room/${roomId}` , {
+        state : { username : urlUsername },
+        replace : true
+      });
+    }
+
+    else if (!location.state?.username && !urlUsername) {
+      navigate(`/ready` , {state : {roomId}});
+    }
 
 
 
@@ -189,6 +210,7 @@ const Room = () => {
       setIsUpdating(true);
       setLanguageValue(languageValue);
       setInputValue(inputValue);
+      console.log(`${username} is typing...`);
     })
 
     socket.on("user-disconnected", ({ id, username }) => {
@@ -250,7 +272,7 @@ const Room = () => {
     if (Array.from(videoGrid.current.children).some((v) => v.srcObject === stream)) {
       return;
     }
-
+      
     video.srcObject = stream;
     video.addEventListener('loadedmetadata', () => video.play());
     videoGrid.current.append(video);
