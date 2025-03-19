@@ -13,13 +13,19 @@ const ChatAI = ({ assistantChatBoxVisibility, username, accessabilityTask, setAc
   const [task, setTask] = useState('');
   const [messageList, setMessageList] = useState([]);
   const acc_Text = useRef(null);
+  const scrollForNewMessage = useRef();
+
+  useEffect(() => {
+    scrollForNewMessage.current?.scrollIntoView();
+
+  },[messageList])
 
 
   const handleTaskSubmit = async (e) => {
     try {
 
       if ((task !== "" || null || undefined) || acc_Text.current !== null) {
-        let finalTaskToSearch ; 
+        let finalTaskToSearch;
 
         if (acc_Text.current !== null) {
           finalTaskToSearch = acc_Text.current;
@@ -28,12 +34,12 @@ const ChatAI = ({ assistantChatBoxVisibility, username, accessabilityTask, setAc
           finalTaskToSearch = task;
         }
         setMessageList((prev) => {
-         
-            return [...prev, { type: 'user', username, task : finalTaskToSearch }]
-          
+
+          return [...prev, { type: 'user', username, task: finalTaskToSearch }]
+
 
         })
-        const response = await axios.post("http://localhost:3000/api/v1/assistant", { task : finalTaskToSearch });
+        const response = await axios.post("http://localhost:3000/api/v1/assistant", { task: finalTaskToSearch });
         if (response.data.success === false) {
           toast.info(`${response.data.msg}`);
           setMessageList((prev) => {
@@ -106,7 +112,7 @@ const ChatAI = ({ assistantChatBoxVisibility, username, accessabilityTask, setAc
 
     <div className={`fixed ${assistantChatBoxVisibility ? `right-0 top-0` : `right-[-100rem] top-0 `}  h-full w-[35rem] lg:w-[35rem] md:w-[23rem] sm:w-[18rem] bg-gray-950 rounded shadow-[0px_0px_20px_rgba(0,0,0,1)] transition-all ease-in-out delay-3050`}>
       <div id='upperChatDiv' className='w-full h-[calc(100%-10%)] bg-gray-950 p-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-webkit text-white flex-column'>
-        <div className='w-full'>
+        <div className='px-2 py-1 rounded bg-gray-800 fixed'>
           <button onClick={clearChat}>Clear chat</button>
         </div>
 
@@ -125,16 +131,16 @@ const ChatAI = ({ assistantChatBoxVisibility, username, accessabilityTask, setAc
         }
 
 
-        {/* <div ref={scrollForNewMessage}></div> */}
+        <div ref={scrollForNewMessage}></div>
 
       </div>
       <div id='lowerChatDiv' className='w-full h-[10%] bg-gray-950 p-2 flex items-center justify-between'>
         <input className='h-[3rem] w-[85%] p-2 font-4xl border-[1px] border-white-500 bg-gray-950 rounded text-white' placeholder='Enter message' value={task} onChange={(e) => setTask(e.target.value)} />
         <button className='h-[3rem] w-[3rem] bg-red-500 rounded flex justify-center items-center text-2xl bg-white hover:bg-gray-300' onClick={handleTaskSubmit}><BsStars /></button>
       </div>
-      
-       
-      
+
+
+
 
     </div>
 

@@ -6,14 +6,48 @@ import { BsFillMicMuteFill } from "react-icons/bs";
 import { FaMicrophone } from "react-icons/fa6";
 import { IoVideocam } from "react-icons/io5";
 import { IoVideocamOff } from "react-icons/io5";
+import {useDebounceEffect} from '../util/debounce.js';
 
-const Webrtc = ({ videoGrid, webrtcVisibility , myStream , screenWidthRef }) => {
+const Webrtc = ({ videoGrid, webrtcVisibility , myStream , screenWidthRef}) => {
 
 
     const [micStatus, setMicStatus] = useState(true);
     const [webcamStatus, setWebcamStatus] = useState(true);
 
+    useEffect(()=> {
+        const webcamState = sessionStorage.getItem("webcamState");
+        const micState = sessionStorage.getItem("micState");
 
+
+        const interval = setInterval(() => {
+            if (myStream.current) {
+                console.log("Stream is ready!");
+                if (webcamState ){ 
+                    setWebcamStatus(JSON.parse(webcamState));
+                    const videoTrack = myStream.current.getVideoTracks()[0];
+                    videoTrack.enabled = JSON.parse(webcamState);
+                };
+                if (micState ) {
+                    setMicStatus(JSON.parse(micState));
+                    const audioTrack = myStream.current.getAudioTracks()[0];
+                    audioTrack.enabled = JSON.parse(micState);
+                };
+                clearInterval(interval);
+            }
+        }, 120);
+
+
+        
+
+        return () => clearInterval(interval);
+    },[])
+
+    useDebounceEffect(()=> {
+
+        sessionStorage.setItem("micState" , JSON.stringify(micStatus));
+        sessionStorage.setItem("webcamState" , JSON.stringify(webcamStatus));
+
+    },[micStatus , webcamStatus],2000)
 
     const micStatusChange = (e) => {
         if (myStream.current) {

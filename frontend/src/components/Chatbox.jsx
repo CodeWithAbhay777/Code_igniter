@@ -11,7 +11,7 @@ const Chatbox = ({ chatBoxVisibility, socket, username }) => {
 
   useEffect((e) => {
     scrollForNewMessage.current?.scrollIntoView();
-  },[newMessage])
+  }, [newMessage])
 
   const sendMessage = (e) => {
 

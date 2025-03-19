@@ -1,23 +1,28 @@
-import React, { useEffect, useMemo, useRef, useState , useContext} from 'react'
+import React, { useEffect, useMemo, useRef, useState, useContext } from 'react'
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import Webrtc from '../components/Webrtc';
-
+import {useDebounceEffect} from '../util/debounce.js';
 import Whiteboard from '../components/Whiteboard';
 import { io } from 'socket.io-client';
 import Editor from '@monaco-editor/react';
 import { languageSupport } from '../util/language_support';
 import { executeCode } from '../util/piston_API';
+import { isTokenExpired } from '../util/isTokenExpired.js';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { motion } from "framer-motion";
 import { BiLoaderAlt } from "react-icons/bi";
 import { starterCode } from '../util/starterCode';
 import { FaChalkboardTeacher } from "react-icons/fa";
+import { IoIosSave } from "react-icons/io";
 import { BsStars } from "react-icons/bs";
 import { FaShareNodes } from "react-icons/fa6";
+import { FcGoogle } from "react-icons/fc";
+import { HiOutlineLogout } from "react-icons/hi";
+
 import Peer from "peerjs";
 
-import {socket} from '../util/socket.js';
+import { socket } from '../util/socket.js';
 
 import { FaEyeSlash } from "react-icons/fa";
 import { IoEyeSharp } from "react-icons/io5";
@@ -32,7 +37,7 @@ import ChatAI from '../components/ChatAI';
 
 const Room = () => {
 
-  
+
 
   // const [socket] = useState(() => io("http://localhost:3000"));
   // const socket = useMemo(() => io("http://localhost:3000"), [])
@@ -46,6 +51,7 @@ const Room = () => {
   const [output, setOutput] = useState([`Click "Run" to see the output here`])
   const [accessCodeForTask, setAccessCodeForTask] = useState('');
   const [btnLoad, setBtnLoad] = useState(false);
+  
   const [webrtcVisibility, setWebrtcVisibility] = useState(true);
   const [whiteBoardVisibility, setWhiteBoardVisibility] = useState(false);
   const [chatBoxVisibility, setChatBoxVisibility] = useState(false);
@@ -65,9 +71,9 @@ const Room = () => {
   const screenWidthRef = useRef(null);
   const isError = useRef(false);
 
-  const [username , setUsername] = useState(
+  const [username, setUsername] = useState(
     location.state?.username || new URLSearchParams(location.search).get('username')
-);
+  );
 
 
 
@@ -80,7 +86,7 @@ const Room = () => {
 
   //   if (token) {
   //     localStorage.setItem('authToken' , token);
-      
+
   //     navigate(`/room/${roomId}` , {
   //       state : { username : urlUsername },
   //       replace : true
@@ -121,7 +127,7 @@ const Room = () => {
       host: '0.peerjs.com',
       secure: true,
       port: 443,
-      
+
     });
 
 
@@ -154,11 +160,11 @@ const Room = () => {
     initWebRTC();
 
     myPeer.current.on('open', (id) => {
-      socket.emit('join-room', roomId, { id, username }); 
+      socket.emit('join-room', roomId, { id, username });
     });
 
     myPeer.current.on('call', (call) => {
-      call.answer(myStream.current); 
+      call.answer(myStream.current);
       const video = createVideoElement();
       call.on('stream', (userVideoStream) => addVideoStream(video, userVideoStream));
     });
@@ -170,26 +176,75 @@ const Room = () => {
   }, [roomId, username]);
 
 
+
+  useDebounceEffect(()=>{
+
+    sessionStorage.setItem("camsWindowState" , JSON.stringify(webrtcVisibility));
+
+  },[webrtcVisibility],2000)
+
+
   //socket useEffect work
   useEffect(() => {
 
 
-    //trail
-    const params = new URLSearchParams(location.search);
-    const token = params.get('token');
-    const urlUsername = params.get('username');
+    console.log("i RAN")
+    //trail code for sessionStorage
+    
+    const camsWindowState = sessionStorage.getItem("camsWindowState");
 
-    if (token) {
-      localStorage.setItem('authToken' , token);
-      
-      navigate(`/room/${roomId}` , {
-        state : { username : urlUsername },
-        replace : true
-      });
+    
+    if (camsWindowState) setWebrtcVisibility(JSON.parse(camsWindowState));
+
+
+
+    const tokenAlreadyExist = localStorage.getItem("authToken");
+    let urlUsername = null;
+
+
+
+    if (!tokenAlreadyExist) {
+      //In case of sign in
+      const params = new URLSearchParams(location.search);
+      const token = params.get('token');
+      urlUsername = params.get('username');
+
+      if (token) {
+        localStorage.setItem('authToken', token);
+
+        navigate(`/room/${roomId}`, {
+          state: { username: urlUsername },
+          replace: true
+        });
+
+        setIsLoggedIn(true);
+        toast.success("Signin successfully");
+      } else {
+        setIsLoggedIn(false);
+      }
+    }
+    else {
+      //case when user already logged in
+
+      if (isTokenExpired(tokenAlreadyExist)) {
+        setIsLoggedIn(false);
+        localStorage.removeItem("authToken");
+      }
+      else {
+        setIsLoggedIn(true);
+
+        console.log("W-E-L-C-O-M-E");
+      }
+
+
+
     }
 
-    else if (!location.state?.username && !urlUsername) {
-      navigate(`/ready` , {state : {roomId}});
+
+
+
+    if (!location.state?.username && !urlUsername) {
+      navigate(`/ready`, { state: { roomId } });
     }
 
 
@@ -272,7 +327,7 @@ const Room = () => {
     if (Array.from(videoGrid.current.children).some((v) => v.srcObject === stream)) {
       return;
     }
-      
+
     video.srcObject = stream;
     video.addEventListener('loadedmetadata', () => video.play());
     videoGrid.current.append(video);
@@ -286,6 +341,7 @@ const Room = () => {
 
   const videoWindowVisibility = (e) => {
     setWebrtcVisibility((prev) => !prev);
+    
   }
 
   const onChangeFunction = (e) => {
@@ -339,6 +395,14 @@ const Room = () => {
     });
   }
 
+  const logoutUser = () => {
+
+    localStorage.removeItem("authToken");
+    setIsLoggedIn(false);
+    toast.success("Logout successfully");
+    console.log("G-o-o-d-B-y-e");
+  }
+
 
   return (
     <div id="wrapper-grid">
@@ -347,24 +411,35 @@ const Room = () => {
 
         <div id="code-editor-area" className='h-full w-full lg:w-1/2 md:w-1/2 sm:w-full p-4 flex flex-col'>
 
-          <select name="languages" id="languages" value={languageValue}
-            onChange={(val) => {
-              setLanguageValue(val.target.value)
 
-            }
-            }
-            className='bg-gray-800 h-[2.5rem] w-[12rem] rounded-md text-white p-1 hover:bg-gray-900 cursor-pointer'>
-            {languageSupport.map((val, i) => {
-              return <option key={i} value={val.language} >{val.language}&nbsp;&nbsp;&nbsp;{val.version}</option>
-            })}
-          </select>
+          <div className='h-[3rem] w-full p-1 flex justify-between items-center'>
+
+            <select name="languages" id="languages" value={languageValue}
+              onChange={(val) => {
+
+                setLanguageValue(val.target.value)
+
+              }
+              }
+              className='bg-gray-800 h-[2.5rem] w-[12rem] rounded-md text-white p-1 hover:bg-gray-900 cursor-pointer'>
+              {languageSupport.map((val, i) => {
+                return <option key={i} value={val.language} >{val.language}&nbsp;&nbsp;&nbsp;{val.version}</option>
+              })}
+            </select>
 
             {
-              isLoggedIn ? console.log(isLoggedIn) : <button onClick={handleGoogleLogin} 
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-              Sign in with google</button>
+              isLoggedIn ?
+                <div className='h-full w-[22rem] flex justify-around items-center'>
+                  <button className='h-[2.5rem] w-[8rem] bg-gray-800 rounded-md text-white hover:bg-gray-700 cursor-pointer flex items-center justify-center'><IoIosSave className='text-3xl mx-1' /> Save</button>
+                  <button className='h-[2.5rem] w-[8rem] bg-red-500 rounded-md text-white hover:bg-red-600 cursor-pointer flex items-center justify-center' onClick={logoutUser}><HiOutlineLogout className='text-2xl mx-1' />Logout</button>
+                </div>
+                :
+                <button onClick={handleGoogleLogin}
+                  className="bg-white hover:bg-gray-200 text-black flex items-center justify-center rounded w-[10rem] h-[2.5rem] p-1 cursor-pointer">
+                  <FcGoogle className='mx-1 text-2xl' />Sign in</button>
             }
 
+          </div>
 
           <div id='editing-area' className='w-full h-full bg-gray-900 flex-grow my-2 p-[7px] rounded overflow-hidden flex-grow'>
             <Editor
