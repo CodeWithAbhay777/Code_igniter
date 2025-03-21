@@ -39,8 +39,7 @@ const Room = () => {
 
 
 
-  // const [socket] = useState(() => io("http://localhost:3000"));
-  // const socket = useMemo(() => io("http://localhost:3000"), [])
+
   const navigate = useNavigate();
   const [languageValue, setLanguageValue] = useState(languageSupport[0].language);
   const [inputValue, setInputValue] = useState(starterCode[languageValue]);
@@ -78,25 +77,6 @@ const Room = () => {
 
 
 
-
-  // useEffect(() => {
-  //   const params = new URLSearchParams(location.search);
-  //   const token = params.get('token');
-  //   const urlUsername = params.get('username');
-
-  //   if (token) {
-  //     localStorage.setItem('authToken' , token);
-
-  //     navigate(`/room/${roomId}` , {
-  //       state : { username : urlUsername },
-  //       replace : true
-  //     });
-  //   }
-
-  //   else if (!location.state?.username && !urlUsername) {
-  //     navigate(`/ready` , {state : {roomId}});
-  //   }
-  // }, []);
 
 
   const handleGoogleLogin = () => {
@@ -181,7 +161,14 @@ const Room = () => {
 
     sessionStorage.setItem("camsWindowState" , JSON.stringify(webrtcVisibility));
 
-  },[webrtcVisibility],2000)
+  },[webrtcVisibility],2000);
+
+  useDebounceEffect(() => {
+
+    sessionStorage.setItem("inputValueState" , JSON.stringify(inputValue));
+    sessionStorage.setItem("languageValueState" , JSON.stringify(languageValue));
+
+  },[inputValue , languageValue] , 2000);
 
 
   //socket useEffect work
@@ -192,10 +179,12 @@ const Room = () => {
     //trail code for sessionStorage
     
     const camsWindowState = sessionStorage.getItem("camsWindowState");
-
+    const inputValueState = sessionStorage.getItem("inputValueState");
+    const languageValueState = sessionStorage.getItem("languageValueState");
     
     if (camsWindowState) setWebrtcVisibility(JSON.parse(camsWindowState));
-
+    if (inputValueState) setInputValue(JSON.parse(inputValueState));
+    if (languageValueState) setLanguageValue(JSON.parse(languageValueState));
 
 
     const tokenAlreadyExist = localStorage.getItem("authToken");
@@ -287,9 +276,9 @@ const Room = () => {
 
   useEffect(() => {
 
-    if (!isUpdating) {
+      if (!isUpdating) {
       socket.emit("change-input", inputValue, username, languageValue);
-    }
+      }
 
     setIsUpdating(false);
 
@@ -429,9 +418,9 @@ const Room = () => {
 
             {
               isLoggedIn ?
-                <div className='h-full w-[22rem] flex justify-around items-center'>
-                  <button className='h-[2.5rem] w-[8rem] bg-gray-800 rounded-md text-white hover:bg-gray-700 cursor-pointer flex items-center justify-center'><IoIosSave className='text-3xl mx-1' /> Save</button>
-                  <button className='h-[2.5rem] w-[8rem] bg-red-500 rounded-md text-white hover:bg-red-600 cursor-pointer flex items-center justify-center' onClick={logoutUser}><HiOutlineLogout className='text-2xl mx-1' />Logout</button>
+                <div className='h-full w-[18rem] flex justify-around items-center'>
+                  <button className='h-[2.5rem] w-[8rem] bg-gray-800 rounded-md text-white hover:bg-gray-700 cursor-pointer flex items-center justify-center'><IoIosSave className='text-3xl mx-1' /> Save code</button>
+                  <button className='h-[2.5rem] w-[8rem] bg-red-600 rounded-md text-white hover:bg-red-500 cursor-pointer flex items-center justify-center' onClick={logoutUser}><HiOutlineLogout className='text-2xl mx-1' />Logout</button>
                 </div>
                 :
                 <button onClick={handleGoogleLogin}

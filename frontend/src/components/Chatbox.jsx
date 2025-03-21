@@ -1,5 +1,6 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useDebounceEffect } from '../util/debounce';
 import { IoSend } from "react-icons/io5";
 
 const Chatbox = ({ chatBoxVisibility, socket, username }) => {
@@ -8,6 +9,15 @@ const Chatbox = ({ chatBoxVisibility, socket, username }) => {
   const [newMessage, setNewMessage] = useState([]);
   const socketref = useRef(socket);
   const scrollForNewMessage = useRef();
+
+  useDebounceEffect(() => {
+    sessionStorage.setItem("allMessageState",JSON.stringify(newMessage));
+  },[newMessage] , 2000);
+
+  useEffect(() => {
+    const allMessageState = sessionStorage.getItem("allMessageState");
+    if (allMessageState) setNewMessage(JSON.parse(allMessageState));
+  },[])
 
   useEffect((e) => {
     scrollForNewMessage.current?.scrollIntoView();

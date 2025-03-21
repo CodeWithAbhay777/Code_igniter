@@ -7,7 +7,7 @@ import { Server } from "socket.io";
 import cookieSession from 'cookie-session';
 import passport from 'passport';
 import User from "./models/User.js";
-// import passportSetup from "./middlewares/passport.js";
+
 import mainRouter from "./routes/index.js";
 import cors from "cors"
 
@@ -46,12 +46,15 @@ const openai = new OpenAI({
   apiKey: secretKey,
 });
 
-const io = new Server(server, {
+const io = new Server(server,{
   cors: {
     origin: "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
   },
+ 
 });
+
+
 
 
 

@@ -25,10 +25,16 @@ router.get('/auth/google/callback', passport.authenticate('google', { failureRed
     const token = jwt.sign({
         id: req.user.id
     }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    
     
     const state = JSON.parse(Buffer.from(req.query.state , 'base64').toString());
 
     res.redirect(`${process.env.CLIENT_URL}/room/${state.roomId}?token=${token}&username=${state.username}`);
 })
+
+
+
+
 
 export default router;
