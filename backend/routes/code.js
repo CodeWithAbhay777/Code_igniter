@@ -39,15 +39,35 @@ router.get("/", authMiddleware, async (req, res) => {
 router.post("/", authMiddleware, async (req, res) => {
 
     try {
+       
 
-        const newCodebase = new codebase(req.body);
+        
+
+        const bodyToSend = {
+           
+            ...req.body , 
+            note : req.body.note || "",
+            ownerId : req.userId,
+        }
+
+       
+        
+        const newCodebase = new codebase(bodyToSend);
         await newCodebase.save();
-
-        res.status(200).json({
-            success: true,
-            message: "data saved succesfully",
-            newCodebase
-        })
+        
+        if (newCodebase) {
+            res.status(200).json({
+                success: true,
+                message: "data saved succesfully",
+                newCodebase
+            })
+        }
+        else {
+            res.status(402).json({
+                success: false,
+                message: "not saved due to some error"
+            });
+        }
 
     } catch (error) {
         res.status(500).json({

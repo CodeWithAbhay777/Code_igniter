@@ -3,6 +3,8 @@ import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import Webrtc from '../components/Webrtc';
 import {useDebounceEffect} from '../util/debounce.js';
 import Whiteboard from '../components/Whiteboard';
+import Codebase from '../components/codebase';
+import SaveModal from '../components/SaveModal.jsx';
 import { io } from 'socket.io-client';
 import Editor from '@monaco-editor/react';
 import { languageSupport } from '../util/language_support';
@@ -54,6 +56,8 @@ const Room = () => {
   const [webrtcVisibility, setWebrtcVisibility] = useState(true);
   const [whiteBoardVisibility, setWhiteBoardVisibility] = useState(false);
   const [chatBoxVisibility, setChatBoxVisibility] = useState(false);
+  const [codebaseVisibility , setCodebaseVisibility] = useState(false);
+  const [saveCodeVisibility , setSaveCodeVisibility] = useState(false);
   const [assistantChatBoxVisibility, setAssistantChatBoxVisibility] = useState(false);
   const [accessabilityTask, setAccessabilityTask] = useState({ acc_taskCode: null, acc_taskError: null, acc_call: false });
 
@@ -122,7 +126,7 @@ const Room = () => {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         myStream.current = stream;
 
-
+        
         addVideoStream(createVideoElement(true), stream);
 
 
@@ -398,6 +402,9 @@ const Room = () => {
       <div ref={screenWidthRef} id='room-whole-wrapper' className=' relative h-full w-full flex flex-wrap lg:overflow-hidden md:overflow-hidden justify-center items-end'>
 
 
+        {saveCodeVisibility && <SaveModal codeSaveinfo = {{languageValue , inputValue}} closeModal = {() => setSaveCodeVisibility(false)}/>}
+
+
         <div id="code-editor-area" className='h-full w-full lg:w-1/2 md:w-1/2 sm:w-full p-4 flex flex-col'>
 
 
@@ -419,7 +426,7 @@ const Room = () => {
             {
               isLoggedIn ?
                 <div className='h-full w-[18rem] flex justify-around items-center'>
-                  <button className='h-[2.5rem] w-[8rem] bg-gray-800 rounded-md text-white hover:bg-gray-700 cursor-pointer flex items-center justify-center'><IoIosSave className='text-3xl mx-1' /> Save code</button>
+                  <button className='h-[2.5rem] w-[8rem] bg-gray-800 rounded-md text-white hover:bg-gray-700 cursor-pointer flex items-center justify-center' onClick={() => setSaveCodeVisibility(true)}><IoIosSave className='text-3xl mx-1' /> Save code</button>
                   <button className='h-[2.5rem] w-[8rem] bg-red-600 rounded-md text-white hover:bg-red-500 cursor-pointer flex items-center justify-center' onClick={logoutUser}><HiOutlineLogout className='text-2xl mx-1' />Logout</button>
                 </div>
                 :
@@ -515,6 +522,9 @@ const Room = () => {
 
         //chatbox
         <Chatbox chatBoxVisibility={chatBoxVisibility} socket={socket} username={username} />
+
+        //codebase
+        <Codebase codebaseVisibility={codebaseVisibility}/>
 
         //assistantchatbox
         <ChatAI assistantChatBoxVisibility={assistantChatBoxVisibility} username={username} accessabilityTask={accessabilityTask} setAccessabilityTask={setAccessabilityTask} />

@@ -11,8 +11,13 @@ const codebaseSchema = mongoose.Schema({
         type : String,
         required : true,
     },
+    language : {
+        type : String,
+        required : true
+    },
     note : {
         type:String,
+        default : ""
     },
     date : {
         type: String,
