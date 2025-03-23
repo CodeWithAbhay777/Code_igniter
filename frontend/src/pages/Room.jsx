@@ -20,6 +20,7 @@ import { IoIosSave } from "react-icons/io";
 import { BsStars } from "react-icons/bs";
 import { FaShareNodes } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
+import { FaSave } from "react-icons/fa";
 import { HiOutlineLogout } from "react-icons/hi";
 
 import Peer from "peerjs";
@@ -493,7 +494,7 @@ const Room = () => {
         </div>
 
         //toolbar
-        <motion.div drag whileDrag={{ scale: 1.2 }} dragConstraints={screenWidthRef} id="nav" className='fixed left-0 bottom-0 z-10 bg-black text-white flex text-4xl items-center justify-evenly h-[6rem] w-full lg:w-[25rem] lg:bottom-0 md:w-[21rem] md:left:0 md:bottom-0 sm:w-[24rem] sm:bottom-0 sm:right-0 rounded-lg shadow-[0px_0px_20px_rgba(0,0,0,1)] cursor-pointer'>
+        <motion.div drag whileDrag={{ scale: 1.2 }} dragConstraints={screenWidthRef} id="nav" className='fixed left-0 bottom-0 z-10 bg-black text-white flex text-4xl items-center justify-evenly h-[6rem] w-full lg:w-[26rem] lg:bottom-0 md:w-[22rem] md:left:0 md:bottom-0 sm:w-[25rem] sm:bottom-0 sm:right-0 rounded-lg shadow-[0px_0px_20px_rgba(0,0,0,1)] cursor-pointer'>
 
           <FaChalkboardTeacher onClick={() => { setWhiteBoardVisibility((prev) => !prev) }} className='hover:text-gray-300' />
 
@@ -503,6 +504,8 @@ const Room = () => {
           <BsStars onClick={() => setAssistantChatBoxVisibility((prev) => !prev)} className={`${assistantChatBoxVisibility ? `text-gray-400` : `text-white`} hover:text-gray-300`} />
 
           <IoMdChatbubbles onClick={chatBoxIconClicked} className={`${chatBoxVisibility ? `text-gray-400` : `text-white`} hover:text-gray-300`} />
+
+          {isLoggedIn && <FaSave onClick={() => { setCodebaseVisibility((prev) => !prev) }} className='text-3xl hover:text-gray-300' />}
 
           {
             webrtcVisibility ? <IoEyeSharp className='hover:text-gray-300' onClick={videoWindowVisibility} /> : <FaEyeSlash className='text-gray-400 hover:text-gray-300' onClick={videoWindowVisibility} />

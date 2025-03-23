@@ -7,19 +7,36 @@ const router = express.Router();
 router.get("/", authMiddleware, async (req, res) => {
     try {
         const userID = req.userId;
+        const limit = parseInt(req.query.limit) || 10;
+        const page = parseInt(req.query.page) || 1;
+        const filterTitle = req.query.search?.toString() || "";
+
+       
+
+        const skip = (page - 1) * limit;
+
         if (userID) {
-            const codeData = await codebase.find({ ownerId: userID });
+            const codeData = await codebase.find({ ownerId: userID , title : {$regex : filterTitle} }).skip(skip).limit(limit);
+            const total = codeData.length;
 
-
-            res.status(200).json({
-                success: true,
-                message: "all code data",
-                codeData
-            })
+            if (codeData) {
+                res.status(200).json({
+                    success: true,
+                    message: "all code data",
+                    total,
+                    codeData
+                });
+            }
+            else {
+                res.status(404).json({
+                    success : false,
+                    message : "Data not found",
+                });
+            }
 
         }
         else {
-            res.status(400).json({
+            res.status(403).json({
                 success: false,
                 message: "Not authorized"
             })
@@ -80,37 +97,37 @@ router.post("/", authMiddleware, async (req, res) => {
 
 });
 
-router.get("/:id", async (req, res) => {
-    try {
-        const { id } = req.params;
-        const data = await codebase.findById({ id });
+// router.get("/:id", async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const data = await codebase.findById({ id });
 
-        if (data) {
-            res.status(200).json({
-                success: true,
-                message: "successfull response",
-                data
-            });
-        }
-        else {
-            res.status(404).json({
-                success: false,
-                message: "no data found",
+//         if (data) {
+//             res.status(200).json({
+//                 success: true,
+//                 message: "successfull response",
+//                 data
+//             });
+//         }
+//         else {
+//             res.status(404).json({
+//                 success: false,
+//                 message: "no data found",
 
-            })
-        }
+//             })
+//         }
 
-    } catch (error) {
-        console.log(error.message);
-        res.status(500).json({
-            success: false,
-            message: "Something went wrong",
+//     } catch (error) {
+//         console.log(error.message);
+//         res.status(500).json({
+//             success: false,
+//             message: "Something went wrong",
 
-        })
+//         })
 
-    }
+//     }
 
-});
+// });
 
 router.put("/:id", async (req, res) => {
 
