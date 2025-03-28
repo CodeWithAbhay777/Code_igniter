@@ -146,9 +146,9 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        console.log(id);
-        const data = await codebase.findOneAndDelete(new mongoose.Types.ObjectId(id));
-        console.log(data);
+        
+        const data = await codebase.findOneAndDelete({_id : id});
+        
         if (data) {
             res.status(200).json({
                 success: true,

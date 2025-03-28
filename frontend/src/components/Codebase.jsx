@@ -2,12 +2,16 @@ import React, { useState, lazy, useRef, useEffect } from 'react';
 import { deleteCode } from '../util/deleteCode';
 import { IoCaretBack } from "react-icons/io5";
 import { IoCaretForwardOutline } from "react-icons/io5";
-import Skeleton from 'react-loading-skeleton'
+import { SkeletonTheme} from 'react-loading-skeleton'
+import  CodebaseLoader from '../components/CodebaseLoader'; 
 import 'react-loading-skeleton/dist/skeleton.css'
 import { useFetchCodes } from '../util/fetchCodes';
 import { MdEdit } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
 import { getLanguageIcon } from '../util/getLanguageIcon';
+import {  toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { BiLoaderAlt } from "react-icons/bi";
 
 
 
@@ -21,6 +25,8 @@ const Codebase = ({ codebaseVisibility, isLoggedIn, savedRefresh }) => {
   const [codeData, setCodeData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [maxMin, setMaxMin] = useState({ max: false, min: false });
+  const [holdDelBtn , setHoldDelBtn] = useState(false);
+  const [holdEditBtn , setHoldEditBtn] = useState(false);
 
   const maxPageLimit = useRef();
 
@@ -58,11 +64,16 @@ const Codebase = ({ codebaseVisibility, isLoggedIn, savedRefresh }) => {
   const deleteCodeAPICall = async(id) => {
     
     if (id){
-      const data = await deleteCode(id);
-      if (data){
-        console.log(data);
+      setHoldDelBtn(true);
+      const responseData = await deleteCode(id);
+      setHoldDelBtn(false);
+      if (responseData){
+        
+        const newData = codeData.filter(e => e._id !== responseData.data._id); 
+        
+        setCodeData(newData);
       }else {
-        console.log("Error " , data);
+        toast.error("Something went wrong : try again later")
       }
      
     }
@@ -117,12 +128,12 @@ const Codebase = ({ codebaseVisibility, isLoggedIn, savedRefresh }) => {
             </div>
 
             <div className='flex flex-col h-full flex-grow bg-gray-950 rounded-lg justify-evenly items-center text-3xl'>
-              <MdEdit className='text-blue-500' />
-              <MdDelete className='text-red-600' onClick={() => deleteCodeAPICall(val._id)} />
+              {holdEditBtn ? <BiLoaderAlt className='text-xl m-auto animate-spin' /> : <MdEdit className='text-blue-500 cursor-pointer' />}
+              {holdDelBtn ? <BiLoaderAlt className='text-xl m-auto animate-spin' /> : <MdDelete className={`text-red-600 cursor-pointer hover:text-red-500`} onClick={() => deleteCodeAPICall(val._id)} />}
 
             </div>
           </div>
-        }) : <Skeleton />}
+        }) : <SkeletonTheme baseColor="#1F2937" highlightColor="#444"><CodebaseLoader count = {5}/></SkeletonTheme>}
 
       </div>
     </div>

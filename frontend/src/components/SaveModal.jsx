@@ -3,7 +3,7 @@ import Editor from '@monaco-editor/react';
 import { RxCross2 } from "react-icons/rx";
 import { BiLoaderAlt } from "react-icons/bi";
 import { FaSave } from "react-icons/fa";
-import { ToastContainer, toast } from "react-toastify";
+import {  toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { saveCode } from '../util/saveCode_API';
 
