@@ -61,6 +61,7 @@ const Room = () => {
   const [saveCodeVisibility , setSaveCodeVisibility] = useState(false);
   const [assistantChatBoxVisibility, setAssistantChatBoxVisibility] = useState(false);
   const [accessabilityTask, setAccessabilityTask] = useState({ acc_taskCode: null, acc_taskError: null, acc_call: false });
+  const [savedRefresh , setSavedRefresh] = useState(false);
 
 
   //trail
@@ -403,7 +404,7 @@ const Room = () => {
       <div ref={screenWidthRef} id='room-whole-wrapper' className=' relative h-full w-full flex flex-wrap lg:overflow-hidden md:overflow-hidden justify-center items-end'>
 
 
-        {saveCodeVisibility && <SaveModal codeSaveinfo = {{languageValue , inputValue}} closeModal = {() => setSaveCodeVisibility(false)}/>}
+        {saveCodeVisibility && <SaveModal codeSaveinfo = {{languageValue , inputValue }} setSavedRefresh={setSavedRefresh} closeModal = {() => setSaveCodeVisibility(false)}/>}
 
 
         <div id="code-editor-area" className='h-full w-full lg:w-1/2 md:w-1/2 sm:w-full p-4 flex flex-col'>
@@ -505,7 +506,7 @@ const Room = () => {
 
           <IoMdChatbubbles onClick={chatBoxIconClicked} className={`${chatBoxVisibility ? `text-gray-400` : `text-white`} hover:text-gray-300`} />
 
-          {isLoggedIn && <FaSave onClick={() => { setCodebaseVisibility((prev) => !prev) }} className='text-3xl hover:text-gray-300' />}
+          {isLoggedIn && <FaSave onClick={() => { setCodebaseVisibility((prev) => !prev) }} className={`text-3xl ${codebaseVisibility ? 'text-gray-400' : 'text-white'} hover:text-gray-300`} />}
 
           {
             webrtcVisibility ? <IoEyeSharp className='hover:text-gray-300' onClick={videoWindowVisibility} /> : <FaEyeSlash className='text-gray-400 hover:text-gray-300' onClick={videoWindowVisibility} />
@@ -527,7 +528,7 @@ const Room = () => {
         <Chatbox chatBoxVisibility={chatBoxVisibility} socket={socket} username={username} />
 
         //codebase
-        <Codebase codebaseVisibility={codebaseVisibility}/>
+        <Codebase codebaseVisibility={codebaseVisibility} isLoggedIn={isLoggedIn} savedRefresh={savedRefresh} setSavedRefresh={setSavedRefresh}/>
 
         //assistantchatbox
         <ChatAI assistantChatBoxVisibility={assistantChatBoxVisibility} username={username} accessabilityTask={accessabilityTask} setAccessabilityTask={setAccessabilityTask} />

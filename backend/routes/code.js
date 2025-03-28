@@ -2,6 +2,9 @@ import express from "express";
 import codebase from '../models/Codebase.js';
 import authMiddleware from "../middlewares/authMiddleware.js";
 
+import moment from 'moment';
+
+
 const router = express.Router();
 
 router.get("/", authMiddleware, async (req, res) => {
@@ -16,8 +19,8 @@ router.get("/", authMiddleware, async (req, res) => {
         const skip = (page - 1) * limit;
 
         if (userID) {
-            const codeData = await codebase.find({ ownerId: userID , title : {$regex : filterTitle} }).skip(skip).limit(limit);
-            const total = codeData.length;
+            const codeData = await codebase.find({ ownerId: userID , title : {$regex : filterTitle} }).skip(skip).limit(limit).sort({date : -1});
+            const total = await codebase.countDocuments({ownerId : userID});
 
             if (codeData) {
                 res.status(200).json({
@@ -58,13 +61,14 @@ router.post("/", authMiddleware, async (req, res) => {
     try {
        
 
-        
+        const date = moment().format("Do MMM YYYY");
 
         const bodyToSend = {
            
             ...req.body , 
             note : req.body.note || "",
             ownerId : req.userId,
+            date,
         }
 
        
@@ -97,37 +101,7 @@ router.post("/", authMiddleware, async (req, res) => {
 
 });
 
-// router.get("/:id", async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const data = await codebase.findById({ id });
 
-//         if (data) {
-//             res.status(200).json({
-//                 success: true,
-//                 message: "successfull response",
-//                 data
-//             });
-//         }
-//         else {
-//             res.status(404).json({
-//                 success: false,
-//                 message: "no data found",
-
-//             })
-//         }
-
-//     } catch (error) {
-//         console.log(error.message);
-//         res.status(500).json({
-//             success: false,
-//             message: "Something went wrong",
-
-//         })
-
-//     }
-
-// });
 
 router.put("/:id", async (req, res) => {
 
@@ -172,8 +146,9 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const data = codebase.findByIdAndDelete({ id });
-
+        console.log(id);
+        const data = await codebase.findOneAndDelete(new mongoose.Types.ObjectId(id));
+        console.log(data);
         if (data) {
             res.status(200).json({
                 success: true,

@@ -45,6 +45,7 @@ export function useFetchCodes(dependencies, delay , search , currentPage , setCo
        
         const data = await makeApiCall(search , currentPage);
         if (data) {
+            console.log(data)
             setCodeData(data.codeData);
             setTotal(data.total);
             setIsLoading(false);

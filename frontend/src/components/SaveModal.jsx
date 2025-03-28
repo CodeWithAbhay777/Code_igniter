@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { saveCode } from '../util/saveCode_API';
 
 
-const SaveModal = ({ codeSaveinfo, closeModal }) => {
+const SaveModal = ({ codeSaveinfo, closeModal, setSavedRefresh }) => {
 
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -22,15 +22,16 @@ const SaveModal = ({ codeSaveinfo, closeModal }) => {
             const response = await saveCode(codeSaveinfo.languageValue, codeSaveinfo.inputValue, title, description);
 
             if (response) {
-                console.log(response);
+                setSaveBtnLoad(false);
+                setSavedRefresh((prev) => !prev);
+                toast.success("Code saved successfully");
+                closeModal();
             }
             else {
-                console.log("kuch gadbad hai");
+                toast.success("Something went wrong");
             }
 
-            setSaveBtnLoad(false);
-            toast.success("code saved successfully");
-            closeModal();
+
         }
     }
 
@@ -54,7 +55,7 @@ const SaveModal = ({ codeSaveinfo, closeModal }) => {
 
                         <textarea id='description' value={description} onChange={(e) => setDescription(e.target.value)} placeholder="optional" className='h-[7.5rem] w-full resize-none m-auto bg-white rounded-md p-2 text-lg shadow-[0px_0px_50px_rgba(0,0,0,1)] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-webkit' />
 
-                        <button onClick={handleSubmit} className='h-[3rem] w-full bg-black hover:bg-gray-950 text-white text-xl rounded-md my-5 shadow-[0px_0px_10px_rgba(0,0,0,0.5)] flex items-center justify-center'><FaSave className='text-2xl mx-2' />{ savebtnLoad ? <BiLoaderAlt className='text-xl m-auto animate-spin'/> : "Submit and save"}</button>
+                        <button onClick={handleSubmit} className='h-[3rem] w-full bg-black hover:bg-gray-950 text-white text-xl rounded-md my-5 shadow-[0px_0px_10px_rgba(0,0,0,0.5)] flex items-center justify-center'><FaSave className='text-2xl mx-2' />{savebtnLoad ? <BiLoaderAlt className='text-xl m-auto animate-spin' /> : "Submit and save"}</button>
 
 
 
