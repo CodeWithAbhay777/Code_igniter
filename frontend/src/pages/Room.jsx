@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState, useContext } from 'react'
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import Webrtc from '../components/Webrtc';
-import {useDebounceEffect} from '../util/debounce.js';
+import { useDebounceEffect } from '../util/debounce.js';
 import Whiteboard from '../components/Whiteboard';
 import Codebase from '../components/codebase';
 import SaveModal from '../components/SaveModal.jsx';
+
 import { io } from 'socket.io-client';
 import Editor from '@monaco-editor/react';
+import CodeEditor from '../components/CodeEditor.jsx';
 import { languageSupport } from '../util/language_support';
 import { executeCode } from '../util/piston_API';
 import { isTokenExpired } from '../util/isTokenExpired.js';
@@ -32,10 +34,12 @@ import { IoEyeSharp } from "react-icons/io5";
 import { IoMdInformationCircle } from "react-icons/io";
 import { IoExit } from "react-icons/io5";
 import { IoMdChatbubbles } from "react-icons/io";
+import Selectlanguage from '../components/Selectlanguage.jsx';
 
 import Chatbox from '../components/Chatbox';
 import '../App.css'
 import ChatAI from '../components/ChatAI';
+import EditWindow from '../components/EditWindow.jsx';
 
 
 const Room = () => {
@@ -44,6 +48,15 @@ const Room = () => {
 
 
   const navigate = useNavigate();
+  const [savedData, setSavedData] = useState({
+    newLangValue: '',
+    newNote: '',
+    newTitle: '',
+    newInputValue: '',
+    id : '',
+    ownerId : ''
+
+  });
   const [languageValue, setLanguageValue] = useState(languageSupport[0].language);
   const [inputValue, setInputValue] = useState(starterCode[languageValue]);
   const [resetBtnClr, setRestBtnClr] = useState(false);
@@ -53,15 +66,16 @@ const Room = () => {
   const [output, setOutput] = useState([`Click "Run" to see the output here`])
   const [accessCodeForTask, setAccessCodeForTask] = useState('');
   const [btnLoad, setBtnLoad] = useState(false);
-  
+
   const [webrtcVisibility, setWebrtcVisibility] = useState(true);
   const [whiteBoardVisibility, setWhiteBoardVisibility] = useState(false);
   const [chatBoxVisibility, setChatBoxVisibility] = useState(false);
-  const [codebaseVisibility , setCodebaseVisibility] = useState(false);
-  const [saveCodeVisibility , setSaveCodeVisibility] = useState(false);
+  const [codebaseVisibility, setCodebaseVisibility] = useState(false);
+  const [saveCodeVisibility, setSaveCodeVisibility] = useState(false);
   const [assistantChatBoxVisibility, setAssistantChatBoxVisibility] = useState(false);
   const [accessabilityTask, setAccessabilityTask] = useState({ acc_taskCode: null, acc_taskError: null, acc_call: false });
-  const [savedRefresh , setSavedRefresh] = useState(false);
+  const [savedRefresh, setSavedRefresh] = useState(false);
+  const [editWindowState, setEditWindowState] = useState(false);
 
 
   //trail
@@ -71,7 +85,7 @@ const Room = () => {
 
   const { roomId } = useParams();
   const location = useLocation();
-  const editorRef = useRef();
+
 
   const screenWidthRef = useRef(null);
   const isError = useRef(false);
@@ -128,7 +142,7 @@ const Room = () => {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         myStream.current = stream;
 
-        
+
         addVideoStream(createVideoElement(true), stream);
 
 
@@ -163,18 +177,18 @@ const Room = () => {
 
 
 
-  useDebounceEffect(()=>{
+  useDebounceEffect(() => {
 
-    sessionStorage.setItem("camsWindowState" , JSON.stringify(webrtcVisibility));
+    sessionStorage.setItem("camsWindowState", JSON.stringify(webrtcVisibility));
 
-  },[webrtcVisibility],2000);
+  }, [webrtcVisibility], 2000);
 
   useDebounceEffect(() => {
 
-    sessionStorage.setItem("inputValueState" , JSON.stringify(inputValue));
-    sessionStorage.setItem("languageValueState" , JSON.stringify(languageValue));
+    sessionStorage.setItem("inputValueState", JSON.stringify(inputValue));
+    sessionStorage.setItem("languageValueState", JSON.stringify(languageValue));
 
-  },[inputValue , languageValue] , 2000);
+  }, [inputValue, languageValue], 2000);
 
 
   //socket useEffect work
@@ -183,11 +197,11 @@ const Room = () => {
 
     console.log("i RAN")
     //trail code for sessionStorage
-    
+
     const camsWindowState = sessionStorage.getItem("camsWindowState");
     const inputValueState = sessionStorage.getItem("inputValueState");
     const languageValueState = sessionStorage.getItem("languageValueState");
-    
+
     if (camsWindowState) setWebrtcVisibility(JSON.parse(camsWindowState));
     if (inputValueState) setInputValue(JSON.parse(inputValueState));
     if (languageValueState) setLanguageValue(JSON.parse(languageValueState));
@@ -282,9 +296,9 @@ const Room = () => {
 
   useEffect(() => {
 
-      if (!isUpdating) {
+    if (!isUpdating) {
       socket.emit("change-input", inputValue, username, languageValue);
-      }
+    }
 
     setIsUpdating(false);
 
@@ -329,14 +343,11 @@ const Room = () => {
   };
 
 
-  const focusing = (e) => {
-    editorRef.current = e;
-    e.focus();
-  }
+
 
   const videoWindowVisibility = (e) => {
     setWebrtcVisibility((prev) => !prev);
-    
+
   }
 
   const onChangeFunction = (e) => {
@@ -404,26 +415,17 @@ const Room = () => {
       <div ref={screenWidthRef} id='room-whole-wrapper' className=' relative h-full w-full flex flex-wrap lg:overflow-hidden md:overflow-hidden justify-center items-end'>
 
 
-        {saveCodeVisibility && <SaveModal codeSaveinfo = {{languageValue , inputValue }} setSavedRefresh={setSavedRefresh} closeModal = {() => setSaveCodeVisibility(false)}/>}
-
+        {saveCodeVisibility && <SaveModal codeSaveinfo={{ languageValue, inputValue }} setSavedRefresh={setSavedRefresh} closeModal={() => setSaveCodeVisibility(false)} />}
+        {editWindowState && <EditWindow setEditWindowState={setEditWindowState} setSavedData={setSavedData} setSavedRefresh={setSavedRefresh} savedData={savedData} />}
 
         <div id="code-editor-area" className='h-full w-full lg:w-1/2 md:w-1/2 sm:w-full p-4 flex flex-col'>
 
 
           <div className='h-[3rem] w-full p-1 flex justify-between items-center'>
 
-            <select name="languages" id="languages" value={languageValue}
-              onChange={(val) => {
 
-                setLanguageValue(val.target.value)
 
-              }
-              }
-              className='bg-gray-800 h-[2.5rem] w-[12rem] rounded-md text-white p-1 hover:bg-gray-900 cursor-pointer'>
-              {languageSupport.map((val, i) => {
-                return <option key={i} value={val.language} >{val.language}&nbsp;&nbsp;&nbsp;{val.version}</option>
-              })}
-            </select>
+            <Selectlanguage language={languageValue} newVal={setLanguageValue} />
 
             {
               isLoggedIn ?
@@ -439,7 +441,13 @@ const Room = () => {
 
           </div>
 
-          <div id='editing-area' className='w-full h-full bg-gray-900 flex-grow my-2 p-[7px] rounded overflow-hidden flex-grow'>
+          
+
+            <CodeEditor language={languageValue} input={inputValue} onChange={onChangeFunction} style={'w-full h-full bg-gray-900 flex-grow my-2 p-[7px] rounded overflow-hidden flex-grow'}/>
+
+          
+
+          {/* <div id='editing-area' className='w-full h-full bg-gray-900 flex-grow my-2 p-[7px] rounded overflow-hidden flex-grow'>
             <Editor
               height="100%"
               theme="vs-dark"
@@ -448,7 +456,7 @@ const Room = () => {
               value={inputValue}
               onChange={onChangeFunction}
             />;
-          </div>
+          </div> */}
 
         </div>
 
@@ -494,7 +502,7 @@ const Room = () => {
 
         </div>
 
-        //toolbar
+        {/* //toolbar */}
         <motion.div drag whileDrag={{ scale: 1.2 }} dragConstraints={screenWidthRef} id="nav" className='fixed left-0 bottom-0 z-10 bg-black text-white flex text-4xl items-center justify-evenly h-[6rem] w-full lg:w-[26rem] lg:bottom-0 md:w-[22rem] md:left:0 md:bottom-0 sm:w-[25rem] sm:bottom-0 sm:right-0 rounded-lg shadow-[0px_0px_20px_rgba(0,0,0,1)] cursor-pointer'>
 
           <FaChalkboardTeacher onClick={() => { setWhiteBoardVisibility((prev) => !prev) }} className='hover:text-gray-300' />
@@ -518,23 +526,23 @@ const Room = () => {
 
         </motion.div>
 
-        //webrtc
+        {/* //webrtc */}
         <Webrtc webrtcVisibility={webrtcVisibility} videoGrid={videoGrid} myStream={myStream} screenWidthRef={screenWidthRef} />
 
 
 
 
-        //chatbox
+        {/* //chatbox */}
         <Chatbox chatBoxVisibility={chatBoxVisibility} socket={socket} username={username} />
 
-        //codebase
-        <Codebase codebaseVisibility={codebaseVisibility} isLoggedIn={isLoggedIn} savedRefresh={savedRefresh} setSavedRefresh={setSavedRefresh}/>
+        {/* //codebase */}
+        <Codebase setEditWindowState={setEditWindowState} codebaseVisibility={codebaseVisibility} setSavedData={setSavedData} isLoggedIn={isLoggedIn} savedRefresh={savedRefresh} setSavedRefresh={setSavedRefresh} />
 
-        //assistantchatbox
+        {/* //assistantchatbox */}
         <ChatAI assistantChatBoxVisibility={assistantChatBoxVisibility} username={username} accessabilityTask={accessabilityTask} setAccessabilityTask={setAccessabilityTask} />
 
 
-        //whiteboard
+        {/* //whiteboard */}
         <Whiteboard whiteBoardVisibility={whiteBoardVisibility} roomId={roomId} />
 
 

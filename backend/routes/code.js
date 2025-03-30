@@ -103,24 +103,28 @@ router.post("/", authMiddleware, async (req, res) => {
 
 
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authMiddleware ,async (req, res) => {
 
     try {
         const { id } = req.params;
-        const data = await codebase.findById({ id });
+        
+        const data = await codebase.findById({ _id : id });
 
+        const date = moment().format("Do MMM YYYY");
 
+        if (data && req.body) {
+          
+            
+            const dataToSave = {...req.body , date};
+            
+            const newData = await codebase.findByIdAndUpdate(id , dataToSave);
 
-        if (data) {
-
-            data = req.body;
-
-            await data.save();
+            
 
             res.status(200).json({
                 success: true,
                 message: "updated successfully",
-                data
+                data : newData,
             });
         }
         else {

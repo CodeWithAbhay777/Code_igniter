@@ -17,7 +17,7 @@ import { BiLoaderAlt } from "react-icons/bi";
 
 
 
-const Codebase = ({ codebaseVisibility, isLoggedIn, savedRefresh }) => {
+const Codebase = ({ codebaseVisibility, isLoggedIn, savedRefresh , setEditWindowState , setSavedData }) => {
 
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -80,6 +80,29 @@ const Codebase = ({ codebaseVisibility, isLoggedIn, savedRefresh }) => {
 
   }
 
+  const setupForEdit = (val) => {
+    console.log(setSavedData)
+    
+    if (val) {
+
+      setEditWindowState(true);
+
+      setSavedData({
+        newLangValue : val.language,
+        newNote : val.note,
+        newInputValue : val.code,
+        newTitle : val.title,
+        ownerId : val.ownerId,
+        id:val._id,
+      })
+
+      
+
+    }
+  }
+
+  
+
   return (
     <div className={`fixed flex flex-col items-center justify-evenly ${(codebaseVisibility && isLoggedIn) ? `right-0 top-0` : `right-[-100rem] top-0 `}  h-full w-[25rem] lg:w-[25rem] md:w-[20rem] sm:w-[18rem] bg-gray-950 rounded shadow-[0px_0px_20px_rgba(0,0,0,1)] transition-all ease-in-out delay-3050`}>
       <div id='upperDiv' className=' w-full h-[8rem] mt-2 bg-gray-950 p-2 flex flex-col items-center justify-between'>
@@ -102,14 +125,14 @@ const Codebase = ({ codebaseVisibility, isLoggedIn, savedRefresh }) => {
 
       </div>
 
-      //lower div
+     
       <div id='lowerDiv' className='flex-grow h-full overflow-auto w-full p-2 overflow-x-hidden scrollbar-thin scrollbar-webkit'>
 
         {!isLoading ? codeData.map((val) => {
 
           const IconComponent = getLanguageIcon(val.language);
 
-          return <div key={val._id} className='h-[6rem] w-full box-border cursor-pointer flex justify-between items-center bg-gray-800 mb-1 p-2 rounded-lg hover:shadow-[0px_0px_10px_rgba(0,0,0,1)] hover:border-l-2 hover:border-green-600 transition-all ease-in-out delay-3050'>
+          return <div key={val._id} className='h-[6rem] w-full box-border cursor-pointer flex justify-between items-center bg-gray-800 mb-1 p-2 rounded-lg hover:shadow-[0px_0px_10px_rgba(0,0,0,1)] hover:border-2 hover:border-green-600 transition-all ease-in-out delay-3050'>
             <div className='h-full w-[85%] flex flex-col justify-between items-center'>
 
               <div className='h-[40%] w-full overflow-hidden p-1 flex items-center justify-start text-white text-lg'>
@@ -128,7 +151,7 @@ const Codebase = ({ codebaseVisibility, isLoggedIn, savedRefresh }) => {
             </div>
 
             <div className='flex flex-col h-full flex-grow bg-gray-950 rounded-lg justify-evenly items-center text-3xl'>
-              {holdEditBtn ? <BiLoaderAlt className='text-xl m-auto animate-spin' /> : <MdEdit className='text-blue-500 cursor-pointer' />}
+              {holdEditBtn ? <BiLoaderAlt className='text-xl m-auto animate-spin' /> : <MdEdit className='text-blue-500 cursor-pointer' onClick={() => setupForEdit(val)}/>}
               {holdDelBtn ? <BiLoaderAlt className='text-xl m-auto animate-spin' /> : <MdDelete className={`text-red-600 cursor-pointer hover:text-red-500`} onClick={() => deleteCodeAPICall(val._id)} />}
 
             </div>
