@@ -7,13 +7,13 @@ import User from "../models/User.js";
 const router = express.Router();
 
 router.get('/auth/google', (req, res, next) => {
-    // Store username in state parameter along with roomId
+    
     const state = JSON.stringify({
         roomId: req.query.roomId,
         username: req.query.username
     });
     
-    // Pass the encoded state to Google
+    
     passport.authenticate('google', { 
         scope: ['profile', 'email'],
         state: Buffer.from(state).toString('base64')

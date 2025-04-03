@@ -40,6 +40,7 @@ import Chatbox from '../components/Chatbox';
 import '../App.css'
 import ChatAI from '../components/ChatAI';
 import EditWindow from '../components/EditWindow.jsx';
+import ShowData from '../components/ShowData.jsx';
 
 
 const Room = () => {
@@ -53,10 +54,19 @@ const Room = () => {
     newNote: '',
     newTitle: '',
     newInputValue: '',
-    id : '',
-    ownerId : ''
+    id: '',
+    ownerId: '',
+    date : '',
 
   });
+  const [showDataValues , setShowDataValues] = useState({
+    langValue: '',
+    note: '',
+    title: '',
+    inputValue: '',
+    id: '',
+    ownerId: ''
+  })
   const [languageValue, setLanguageValue] = useState(languageSupport[0].language);
   const [inputValue, setInputValue] = useState(starterCode[languageValue]);
   const [resetBtnClr, setRestBtnClr] = useState(false);
@@ -76,6 +86,9 @@ const Room = () => {
   const [accessabilityTask, setAccessabilityTask] = useState({ acc_taskCode: null, acc_taskError: null, acc_call: false });
   const [savedRefresh, setSavedRefresh] = useState(false);
   const [editWindowState, setEditWindowState] = useState(false);
+  const [showWindowState , setShowWindowState] = useState(false);
+  const handleRefreshLanguageChange = useRef(false);
+
 
 
   //trail
@@ -116,7 +129,14 @@ const Room = () => {
   const peers = useRef({});
 
   useEffect(() => {
-    setInputValue(starterCode[languageValue])
+    console.log("i rannnnnn");
+    if (!handleRefreshLanguageChange.current) {
+      setInputValue(starterCode[languageValue])
+    }
+    handleRefreshLanguageChange.current = false;
+
+
+
   }, [languageValue])
 
 
@@ -195,16 +215,25 @@ const Room = () => {
   useEffect(() => {
 
 
-    console.log("i RAN")
+
     //trail code for sessionStorage
+    sessionStorage.setItem("inRoom", "true");
 
     const camsWindowState = sessionStorage.getItem("camsWindowState");
     const inputValueState = sessionStorage.getItem("inputValueState");
     const languageValueState = sessionStorage.getItem("languageValueState");
 
-    if (camsWindowState) setWebrtcVisibility(JSON.parse(camsWindowState));
-    if (inputValueState) setInputValue(JSON.parse(inputValueState));
-    if (languageValueState) setLanguageValue(JSON.parse(languageValueState));
+    if (camsWindowState !== null && camsWindowState !== "undefined") {
+      setWebrtcVisibility(JSON.parse(camsWindowState));
+    }
+    if (languageValueState !== null && languageValueState !== "undefined") {
+      setLanguageValue(JSON.parse(languageValueState));
+      handleRefreshLanguageChange.current = true;
+    }
+    if (inputValueState !== null && inputValueState !== "undefined") {
+      setInputValue(JSON.parse(inputValueState));
+    }
+
 
 
     const tokenAlreadyExist = localStorage.getItem("authToken");
@@ -292,7 +321,9 @@ const Room = () => {
     }
 
 
-  }, [])
+  }, []);
+
+
 
   useEffect(() => {
 
@@ -409,14 +440,21 @@ const Room = () => {
     console.log("G-o-o-d-B-y-e");
   }
 
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(roomId)
+    .then(() => toast.success('Roomid copied'))
+    .catch((e) => toast.error('Something went wron'));
+  }
+
 
   return (
-    <div id="wrapper-grid">
-      <div ref={screenWidthRef} id='room-whole-wrapper' className=' relative h-full w-full flex flex-wrap lg:overflow-hidden md:overflow-hidden justify-center items-end'>
+    <>
+      <div ref={screenWidthRef} id='room-whole-wrapper' className=' relative h-full w-full flex flex-wrap lg:overflow-hidden md:overflow-hidden sm:overflow-hidden justify-center items-end '>
 
 
         {saveCodeVisibility && <SaveModal codeSaveinfo={{ languageValue, inputValue }} setSavedRefresh={setSavedRefresh} closeModal={() => setSaveCodeVisibility(false)} />}
         {editWindowState && <EditWindow setEditWindowState={setEditWindowState} setSavedData={setSavedData} setSavedRefresh={setSavedRefresh} savedData={savedData} />}
+        {showWindowState && <ShowData setShowWindowState = {setShowWindowState} showDataValues={showDataValues} isLoggedIn={isLoggedIn}/>}
 
         <div id="code-editor-area" className='h-full w-full lg:w-1/2 md:w-1/2 sm:w-full p-4 flex flex-col'>
 
@@ -441,22 +479,11 @@ const Room = () => {
 
           </div>
 
-          
 
-            <CodeEditor language={languageValue} input={inputValue} onChange={onChangeFunction} style={'w-full h-full bg-gray-900 flex-grow my-2 p-[7px] rounded overflow-hidden flex-grow'}/>
 
-          
+          <CodeEditor language={languageValue} input={inputValue} onChange={onChangeFunction} style={'w-full h-full bg-gray-900 flex-grow my-2 p-[7px] rounded overflow-hidden flex-grow'} />
 
-          {/* <div id='editing-area' className='w-full h-full bg-gray-900 flex-grow my-2 p-[7px] rounded overflow-hidden flex-grow'>
-            <Editor
-              height="100%"
-              theme="vs-dark"
-              onMount={focusing}
-              language={languageValue}
-              value={inputValue}
-              onChange={onChangeFunction}
-            />;
-          </div> */}
+
 
         </div>
 
@@ -507,7 +534,7 @@ const Room = () => {
 
           <FaChalkboardTeacher onClick={() => { setWhiteBoardVisibility((prev) => !prev) }} className='hover:text-gray-300' />
 
-          <FaShareNodes className='hover:text-gray-300' />
+          <FaShareNodes className='hover:text-gray-300' onClick={copyToClipboard}/>
 
 
           <BsStars onClick={() => setAssistantChatBoxVisibility((prev) => !prev)} className={`${assistantChatBoxVisibility ? `text-gray-400` : `text-white`} hover:text-gray-300`} />
@@ -520,9 +547,12 @@ const Room = () => {
             webrtcVisibility ? <IoEyeSharp className='hover:text-gray-300' onClick={videoWindowVisibility} /> : <FaEyeSlash className='text-gray-400 hover:text-gray-300' onClick={videoWindowVisibility} />
           }
 
-          <IoMdInformationCircle className='hover:text-gray-300' />
+          <IoMdInformationCircle className='hover:text-gray-300' onClick={() => toast.info('Coming soon : working on it ')}/>
 
-          <IoExit className='text-red-500 hover:text-red-700' />
+          <IoExit className='text-red-500 hover:text-red-700' onClick={() => {
+            window.history.replaceState(null, "", window.location.href);
+            navigate("/");
+        }}/>
 
         </motion.div>
 
@@ -536,7 +566,7 @@ const Room = () => {
         <Chatbox chatBoxVisibility={chatBoxVisibility} socket={socket} username={username} />
 
         {/* //codebase */}
-        <Codebase setEditWindowState={setEditWindowState} codebaseVisibility={codebaseVisibility} setSavedData={setSavedData} isLoggedIn={isLoggedIn} savedRefresh={savedRefresh} setSavedRefresh={setSavedRefresh} />
+        <Codebase setEditWindowState={setEditWindowState} setShowWindowState={setShowWindowState} setShowDataValues={setShowDataValues} codebaseVisibility={codebaseVisibility} setSavedData={setSavedData} isLoggedIn={isLoggedIn} savedRefresh={savedRefresh} setSavedRefresh={setSavedRefresh} />
 
         {/* //assistantchatbox */}
         <ChatAI assistantChatBoxVisibility={assistantChatBoxVisibility} username={username} accessabilityTask={accessabilityTask} setAccessabilityTask={setAccessabilityTask} />
@@ -551,7 +581,7 @@ const Room = () => {
         <ToastContainer />
       </>
 
-    </div>
+    </>
   )
 }
 

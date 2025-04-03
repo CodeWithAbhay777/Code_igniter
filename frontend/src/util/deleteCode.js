@@ -8,7 +8,7 @@ export async function deleteCode(id) {
 
         if (!token) return null;
 
-      console.log(id)
+      
 
         const response = await axios.delete(`http://localhost:3000/api/v1/codebase/${id}`, {
             

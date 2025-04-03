@@ -6,10 +6,10 @@ import db from "./db.js";
 import { Server } from "socket.io";
 import cookieSession from 'cookie-session';
 import passport from 'passport';
-import User from "./models/User.js";
+
 
 import mainRouter from "./routes/index.js";
-import cors from "cors"
+import cors from "cors";
 
 
 

@@ -11,13 +11,14 @@ import { MdDelete } from "react-icons/md";
 import { getLanguageIcon } from '../util/getLanguageIcon';
 import {  toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ShowData from './ShowData';
 import { BiLoaderAlt } from "react-icons/bi";
 
 
 
 
 
-const Codebase = ({ codebaseVisibility, isLoggedIn, savedRefresh , setEditWindowState , setSavedData }) => {
+const Codebase = ({ codebaseVisibility, isLoggedIn, savedRefresh , setEditWindowState , setSavedData , setShowDataValues , setShowWindowState }) => {
 
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -83,7 +84,7 @@ const Codebase = ({ codebaseVisibility, isLoggedIn, savedRefresh , setEditWindow
   const setupForEdit = (val) => {
     console.log(setSavedData)
     
-    if (val) {
+    if (val && isLoggedIn) {
 
       setEditWindowState(true);
 
@@ -99,6 +100,24 @@ const Codebase = ({ codebaseVisibility, isLoggedIn, savedRefresh , setEditWindow
       
 
     }
+  }
+
+  const callShowData = (val) => {
+      if (val && isLoggedIn) {
+
+        setShowWindowState(true);
+
+        setShowDataValues({
+          language : val.language,
+          id : val._id ,
+          ownerId : val.ownerId,
+          inputValue : val.code,
+          note : val.note,
+          date : val.date,
+          title : val.title,
+
+        })
+      }
   }
 
   
@@ -132,7 +151,7 @@ const Codebase = ({ codebaseVisibility, isLoggedIn, savedRefresh , setEditWindow
 
           const IconComponent = getLanguageIcon(val.language);
 
-          return <div key={val._id} className='h-[6rem] w-full box-border cursor-pointer flex justify-between items-center bg-gray-800 mb-1 p-2 rounded-lg hover:shadow-[0px_0px_10px_rgba(0,0,0,1)] hover:border-2 hover:border-green-600 transition-all ease-in-out delay-3050'>
+          return <div key={val._id} onClick={() => callShowData(val)} className='h-[6rem] w-full box-border cursor-pointer flex justify-between items-center bg-gray-800 mb-1 p-2 rounded-lg hover:shadow-[0px_0px_10px_rgba(0,0,0,1)] hover:border-2 hover:border-green-600 transition-all ease-in-out delay-3050'>
             <div className='h-full w-[85%] flex flex-col justify-between items-center'>
 
               <div className='h-[40%] w-full overflow-hidden p-1 flex items-center justify-start text-white text-lg'>
@@ -151,8 +170,12 @@ const Codebase = ({ codebaseVisibility, isLoggedIn, savedRefresh , setEditWindow
             </div>
 
             <div className='flex flex-col h-full flex-grow bg-gray-950 rounded-lg justify-evenly items-center text-3xl'>
-              {holdEditBtn ? <BiLoaderAlt className='text-xl m-auto animate-spin' /> : <MdEdit className='text-blue-500 cursor-pointer' onClick={() => setupForEdit(val)}/>}
-              {holdDelBtn ? <BiLoaderAlt className='text-xl m-auto animate-spin' /> : <MdDelete className={`text-red-600 cursor-pointer hover:text-red-500`} onClick={() => deleteCodeAPICall(val._id)} />}
+              {holdEditBtn ? <BiLoaderAlt className='text-xl m-auto animate-spin' /> : <MdEdit className='text-blue-500 cursor-pointer' onClick={(e) => {
+                e.stopPropagation();
+                setupForEdit(val)}}/>}
+              {holdDelBtn ? <BiLoaderAlt className='text-xl m-auto animate-spin' /> : <MdDelete className={`text-red-600 cursor-pointer hover:text-red-500`} onClick={(e) => {
+                e.stopPropagation();
+                deleteCodeAPICall(val._id)} }/>}
 
             </div>
           </div>
