@@ -3,7 +3,7 @@ import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import Webrtc from '../components/Webrtc';
 import { useDebounceEffect } from '../util/debounce.js';
 import Whiteboard from '../components/Whiteboard';
-import Codebase from '../components/codebase';
+import Codebase from '../components/Codebase';
 import SaveModal from '../components/SaveModal.jsx';
 
 
