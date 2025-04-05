@@ -25,7 +25,7 @@ export const saveCode = async (language, code, title, note) => {
 
         
 
-        let response = await axios.post(`${import.meta.env.BACKEND_BASEURL}/api/v1/codebase`, body, config);
+        let response = await axios.post(`${import.meta.env.VITE_BACKEND_BASEURL}/api/v1/codebase`, body, config);
 
         if (response.data.success) {
             return response.data;

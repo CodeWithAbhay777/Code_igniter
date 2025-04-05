@@ -10,7 +10,7 @@ export async function deleteCode(id) {
 
       
 
-        const response = await axios.delete(`${import.meta.env.BACKEND_BASEURL}/api/v1/codebase/${id}`, {
+        const response = await axios.delete(`${import.meta.env.VITE_BACKEND_BASEURL}/api/v1/codebase/${id}`, {
             
             headers: { Authorization: `goat ${token}` }
         });

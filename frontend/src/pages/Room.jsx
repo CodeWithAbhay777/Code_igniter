@@ -116,7 +116,7 @@ const Room = () => {
 
 
   const handleGoogleLogin = () => {
-    window.location.href = `${import.meta.env.BACKEND_BASEURL}/api/v1/auth/google?roomId=${roomId}&username=${username}`;
+    window.location.href = `${import.meta.env.VITE_BACKEND_BASEURL}/api/v1/auth/google?roomId=${roomId}&username=${username}`;
   };
 
 

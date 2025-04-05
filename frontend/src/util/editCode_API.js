@@ -25,7 +25,7 @@ export const editCodeSumbit = async (language, code, title, note , id , ownerId)
 
         
 
-        let response = await axios.put(`${import.meta.env.BACKEND_BASEURL}/api/v1/codebase/${id}`, body, config);
+        let response = await axios.put(`${import.meta.env.VITE_BACKEND_BASEURL}/api/v1/codebase/${id}`, body, config);
 
         if (response.data.success) {
             return response.data;

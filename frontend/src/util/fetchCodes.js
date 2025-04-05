@@ -12,7 +12,7 @@ const makeApiCall = async (search , currentPage ) => {
 
       
 
-        const response = await axios.get(`${import.meta.env.BACKEND_BASEURL}/api/v1/codebase`, {
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_BASEURL}/api/v1/codebase`, {
             params: { limit: 10, page: currentPage, search },
             headers: { Authorization: `goat ${token}` }
         });

@@ -39,7 +39,7 @@ const ChatAI = ({ assistantChatBoxVisibility, username, accessabilityTask, setAc
 
 
         })
-        const response = await axios.post(`${import.meta.env.BACKEND_BASEURL}/api/v1/assistant`, { task: finalTaskToSearch });
+        const response = await axios.post(`${import.meta.env.VITE_BACKEND_BASEURL}/api/v1/assistant`, { task: finalTaskToSearch });
         if (response.data.success === false) {
           toast.info(`${response.data.msg}`);
           setMessageList((prev) => {
