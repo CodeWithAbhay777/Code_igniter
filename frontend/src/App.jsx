@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import {  Routes, Route, } from "react-router-dom";
-import Room from "./pages/room.jsx";
+import Room from './pages/Room.jsx';
 import './index.css'
 import './App.css'
 import Entry from './pages/Entry.jsx';
