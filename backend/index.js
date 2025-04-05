@@ -15,7 +15,12 @@ import cors from "cors";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(cors());
+app.use(cors({
+  origin: "https://code-igniter-ftfo.vercel.app",
+  credentials: true,
+}
+
+));
 
 //cookie-session
 const sessionOptions = {
@@ -102,6 +107,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3000, () => {
+server.listen(PORT, () => {
   console.log(`Server running`);
 });
