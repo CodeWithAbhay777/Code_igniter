@@ -43,7 +43,7 @@ const Chatbox = ({ chatBoxVisibility, socket, username }) => {
   useEffect(() => {
 
     const handleMessage = (username, message) => {
-      console.log("Message received by client:", username, message);
+     
       setNewMessage((prev) => {
         return [...prev, {
           isAuthor: false,
@@ -56,13 +56,13 @@ const Chatbox = ({ chatBoxVisibility, socket, username }) => {
     socketref.current.on("get-message", handleMessage);
 
     return () => {
-      console.log("Cleaning up 'get-message' listener");
+     
       socketref.current.off("get-message", handleMessage);
     }
   }, [socket])
 
   return (
-    <div className={`fixed ${chatBoxVisibility ? `right-0 top-0` : `right-[-100rem] top-0 `}  h-full w-[25rem] lg:w-[25rem] md:w-[20rem] sm:w-[18rem] bg-gray-950 rounded shadow-[0px_0px_20px_rgba(0,0,0,1)] transition-all ease-in-out delay-3050`}>
+    <div className={`fixed ${chatBoxVisibility ? `right-0 top-0` : `right-[-100rem] top-0 `}  h-full w-[92%] md:w-[25rem] sm:w-[21rem] bg-gray-950 rounded shadow-[0px_0px_20px_rgba(0,0,0,1)] transition-all ease-in-out delay-3050`}>
       <div id='upperChatDiv' className='w-full h-[calc(100%-10%)] bg-gray-950 p-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-webkit text-white flex-column'>
 
         {newMessage.map((e) => {

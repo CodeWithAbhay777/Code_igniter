@@ -10,7 +10,7 @@ export async function deleteCode(id) {
 
       
 
-        const response = await axios.delete(`http://localhost:3000/api/v1/codebase/${id}`, {
+        const response = await axios.delete(`${import.meta.env.BACKEND_BASEURL}/api/v1/codebase/${id}`, {
             
             headers: { Authorization: `goat ${token}` }
         });
@@ -26,8 +26,8 @@ export async function deleteCode(id) {
 
         
     } catch (error) {
-        console.log(error.message);
-        // toast.error("Error : Try it later");
+      
+        return null;
     }
 
 }

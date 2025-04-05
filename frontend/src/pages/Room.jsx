@@ -6,8 +6,8 @@ import Whiteboard from '../components/Whiteboard';
 import Codebase from '../components/codebase';
 import SaveModal from '../components/SaveModal.jsx';
 
-import { io } from 'socket.io-client';
-import Editor from '@monaco-editor/react';
+
+
 import CodeEditor from '../components/CodeEditor.jsx';
 import { languageSupport } from '../util/language_support';
 import { executeCode } from '../util/piston_API';
@@ -24,6 +24,8 @@ import { FaShareNodes } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
 import { FaSave } from "react-icons/fa";
 import { HiOutlineLogout } from "react-icons/hi";
+import { RiMenu3Line } from "react-icons/ri";
+import { RxCross2 } from "react-icons/rx";
 
 import Peer from "peerjs";
 
@@ -56,10 +58,10 @@ const Room = () => {
     newInputValue: '',
     id: '',
     ownerId: '',
-    date : '',
+    date: '',
 
   });
-  const [showDataValues , setShowDataValues] = useState({
+  const [showDataValues, setShowDataValues] = useState({
     langValue: '',
     note: '',
     title: '',
@@ -71,8 +73,8 @@ const Room = () => {
   const [inputValue, setInputValue] = useState(starterCode[languageValue]);
   const [resetBtnClr, setRestBtnClr] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [newUser, setNewUser] = useState("");
-  const [userExit, setUserExit] = useState("");
+  
+  
   const [output, setOutput] = useState([`Click "Run" to see the output here`])
   const [accessCodeForTask, setAccessCodeForTask] = useState('');
   const [btnLoad, setBtnLoad] = useState(false);
@@ -86,14 +88,15 @@ const Room = () => {
   const [accessabilityTask, setAccessabilityTask] = useState({ acc_taskCode: null, acc_taskError: null, acc_call: false });
   const [savedRefresh, setSavedRefresh] = useState(false);
   const [editWindowState, setEditWindowState] = useState(false);
-  const [showWindowState , setShowWindowState] = useState(false);
+  const [showWindowState, setShowWindowState] = useState(false);
   const handleRefreshLanguageChange = useRef(false);
+  const [menuBtn, setMenuBtn] = useState(false);
 
 
 
   //trail
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userProfile, setUserProfile] = useState(null);
+  
 
 
   const { roomId } = useParams();
@@ -113,7 +116,7 @@ const Room = () => {
 
 
   const handleGoogleLogin = () => {
-    window.location.href = `http://localhost:3000/api/v1/auth/google?roomId=${roomId}&username=${username}`;
+    window.location.href = `${import.meta.env.BACKEND_BASEURL}/api/v1/auth/google?roomId=${roomId}&username=${username}`;
   };
 
 
@@ -129,7 +132,7 @@ const Room = () => {
   const peers = useRef({});
 
   useEffect(() => {
-    console.log("i rannnnnn");
+    
     if (!handleRefreshLanguageChange.current) {
       setInputValue(starterCode[languageValue])
     }
@@ -172,7 +175,7 @@ const Room = () => {
           call.on('stream', (userVideoStream) => addVideoStream(video, userVideoStream));
         });
       } catch (error) {
-        console.error('Error accessing media devices:', error);
+        
         toast.error('Could not access camera/microphone!');
       }
     };
@@ -271,7 +274,7 @@ const Room = () => {
       else {
         setIsLoggedIn(true);
 
-        console.log("W-E-L-C-O-M-E");
+        
       }
 
 
@@ -291,7 +294,7 @@ const Room = () => {
 
       toast.info(`${username} joined the room.`);
 
-      console.log(`${username} connected with Peer ID: ${id}`);
+      
 
       connectToNewUser(id, myStream.current);
 
@@ -303,11 +306,11 @@ const Room = () => {
       setIsUpdating(true);
       setLanguageValue(languageValue);
       setInputValue(inputValue);
-      console.log(`${username} is typing...`);
+      
     })
 
     socket.on("user-disconnected", ({ id, username }) => {
-      console.log(`User disconnected: ${username}`);
+      
       toast.info(`${username} left the room.`);
       if (peers.current[id]) peers.current[id].close();
     })
@@ -409,7 +412,7 @@ const Room = () => {
 
 
     } catch (error) {
-      console.log(error)
+     
       toast.error("Something went wrong!");
 
     }
@@ -437,26 +440,26 @@ const Room = () => {
     localStorage.removeItem("authToken");
     setIsLoggedIn(false);
     toast.success("Logout successfully");
-    console.log("G-o-o-d-B-y-e");
+    
   }
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(roomId)
-    .then(() => toast.success('Roomid copied'))
-    .catch((e) => toast.error('Something went wron'));
+      .then(() => toast.success('Roomid copied'))
+      .catch((e) => toast.error('Something went wron'));
   }
 
 
   return (
     <>
-      <div ref={screenWidthRef} id='room-whole-wrapper' className=' relative h-full w-full flex flex-wrap lg:overflow-hidden md:overflow-hidden sm:overflow-hidden justify-center items-end '>
+      <div ref={screenWidthRef} id='room-whole-wrapper' className=' relative h-full w-full flex flex-wrap  overflow-y-auto overflow-x-hidden lg:overflow-hidden justify-center items-end '>
 
 
         {saveCodeVisibility && <SaveModal codeSaveinfo={{ languageValue, inputValue }} setSavedRefresh={setSavedRefresh} closeModal={() => setSaveCodeVisibility(false)} />}
         {editWindowState && <EditWindow setEditWindowState={setEditWindowState} setSavedData={setSavedData} setSavedRefresh={setSavedRefresh} savedData={savedData} />}
-        {showWindowState && <ShowData setShowWindowState = {setShowWindowState} showDataValues={showDataValues} isLoggedIn={isLoggedIn}/>}
+        {showWindowState && <ShowData setShowWindowState={setShowWindowState} showDataValues={showDataValues} isLoggedIn={isLoggedIn} />}
 
-        <div id="code-editor-area" className='h-full w-full lg:w-1/2 md:w-1/2 sm:w-full p-4 flex flex-col'>
+        <div id="code-editor-area" className='h-full w-full p-2 lg:w-1/2 sm:w-full lg:p-4 sm:p-2 flex flex-col'>
 
 
           <div className='h-[3rem] w-full p-1 flex justify-between items-center'>
@@ -467,13 +470,25 @@ const Room = () => {
 
             {
               isLoggedIn ?
-                <div className='h-full w-[18rem] flex justify-around items-center'>
-                  <button className='h-[2.5rem] w-[8rem] bg-gray-800 rounded-md text-white hover:bg-gray-700 cursor-pointer flex items-center justify-center' onClick={() => setSaveCodeVisibility(true)}><IoIosSave className='text-3xl mx-1' /> Save code</button>
-                  <button className='h-[2.5rem] w-[8rem] bg-red-600 rounded-md text-white hover:bg-red-500 cursor-pointer flex items-center justify-center' onClick={logoutUser}><HiOutlineLogout className='text-2xl mx-1' />Logout</button>
+                <div className='relative'>
+                  { menuBtn ? <RxCross2 onClick={() => setMenuBtn(prev => !prev)} className='text-white text-2xl md:hidden'/>
+                   : <RiMenu3Line onClick={() => setMenuBtn(prev => !prev)} className='text-white text-2xl md:hidden' />
+                  }
+                  <div className={`absolute top-full right-0 z-[1]  transition-all duration-300 rounded-lg overflow-hidden ${menuBtn ? 'h-[7rem] p-4' : 'h-0 p-0'} md:hidden block w-[10rem] bg-gray-900  flex flex-col justify-center gap-2 items-center`}>
+                    <button className=' h-[2.5rem] w-[8rem] bg-gray-800 rounded-md text-white hover:bg-gray-700 cursor-pointer flex items-center justify-center' onClick={() => setSaveCodeVisibility(true)}><IoIosSave className='text-3xl mx-1' /> Save code</button>
+                    <button className=' h-[2.5rem] w-[8rem] bg-red-600 rounded-md text-white hover:bg-red-500 cursor-pointer flex items-center justify-center' onClick={logoutUser}><HiOutlineLogout className='text-2xl mx-1' />Logout</button>
+                  </div>
+                  
+                  <div className=' hidden md:h-full md:block md:w-[18rem] md:flex justify-around items-center'>
+                    <button className=' sm:h-[2.5rem] sm:w-[8rem] bg-gray-800 rounded-md text-white hover:bg-gray-700 cursor-pointer flex items-center justify-center' onClick={() => setSaveCodeVisibility(true)}><IoIosSave className='text-3xl mx-1' /> Save code</button>
+                    <button className=' sm:h-[2.5rem] sm:w-[8rem] bg-red-600 rounded-md text-white hover:bg-red-500 cursor-pointer flex items-center justify-center' onClick={logoutUser}><HiOutlineLogout className='text-2xl mx-1' />Logout</button>
+                  </div>
+
+
                 </div>
                 :
                 <button onClick={handleGoogleLogin}
-                  className="bg-white hover:bg-gray-200 text-black flex items-center justify-center rounded w-[10rem] h-[2.5rem] p-1 cursor-pointer">
+                  className="bg-white hover:bg-gray-200 text-black flex items-center justify-center rounded w-[10rem] h-[2.2rem] sm:h-[2.5rem] p-1 cursor-pointer">
                   <FcGoogle className='mx-1 text-2xl' />Sign in</button>
             }
 
@@ -487,9 +502,9 @@ const Room = () => {
 
         </div>
 
-        <div id="output-area" className=' h-full w-full lg:w-1/2 md:w-1/2 sm:w-full p-2 flex flex-col'>
+        <div id="output-area" className=' h-full w-full lg:w-1/2 sm:w-full p-2 flex flex-col'>
 
-          <div id='btns-area' className=' h-[3rem] w-full p-2 flex justify-between items-center my-1'>
+          <div id='btns-area' className={` w-full sm:h-[3rem] sm:w-full p-2 flex flex-wrap sm:justify-between items-center my-1 mb-3`}>
 
             <div className='flex justify-between items-center '>
               <button className='h-[2.5rem] w-[10rem] bg-gray-800 rounded-md text-white hover:bg-gray-700 cursor-pointer' onClick={getOutput}>
@@ -530,11 +545,11 @@ const Room = () => {
         </div>
 
         {/* //toolbar */}
-        <motion.div drag whileDrag={{ scale: 1.2 }} dragConstraints={screenWidthRef} id="nav" className='fixed left-0 bottom-0 z-10 bg-black text-white flex text-4xl items-center justify-evenly h-[6rem] w-full lg:w-[26rem] lg:bottom-0 md:w-[22rem] md:left:0 md:bottom-0 sm:w-[25rem] sm:bottom-0 sm:right-0 rounded-lg shadow-[0px_0px_20px_rgba(0,0,0,1)] cursor-pointer'>
+        <motion.div drag whileDrag={{ scale: 1.2 }} dragConstraints={screenWidthRef} id="nav" className='fixed left-0 bottom-0 z-10 bg-black text-white flex text-4xl items-center justify-evenly h-[6rem] w-full lg:w-[26rem] lg:bottom-0 md:w-[25rem] md:left:0 md:bottom-0 sm:w-[25rem] sm:bottom-0 sm:right-0 rounded-lg shadow-[0px_0px_20px_rgba(0,0,0,1)] cursor-pointer'>
 
           <FaChalkboardTeacher onClick={() => { setWhiteBoardVisibility((prev) => !prev) }} className='hover:text-gray-300' />
 
-          <FaShareNodes className='hover:text-gray-300' onClick={copyToClipboard}/>
+          <FaShareNodes className='hover:text-gray-300' onClick={copyToClipboard} />
 
 
           <BsStars onClick={() => setAssistantChatBoxVisibility((prev) => !prev)} className={`${assistantChatBoxVisibility ? `text-gray-400` : `text-white`} hover:text-gray-300`} />
@@ -547,12 +562,12 @@ const Room = () => {
             webrtcVisibility ? <IoEyeSharp className='hover:text-gray-300' onClick={videoWindowVisibility} /> : <FaEyeSlash className='text-gray-400 hover:text-gray-300' onClick={videoWindowVisibility} />
           }
 
-          <IoMdInformationCircle className='hover:text-gray-300' onClick={() => toast.info('Coming soon : working on it ')}/>
+          <IoMdInformationCircle className='hover:text-gray-300' onClick={() => toast.info('Coming soon : working on it ')} />
 
           <IoExit className='text-red-500 hover:text-red-700' onClick={() => {
             window.history.replaceState(null, "", window.location.href);
             navigate("/");
-        }}/>
+          }} />
 
         </motion.div>
 

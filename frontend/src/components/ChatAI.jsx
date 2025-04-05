@@ -39,13 +39,13 @@ const ChatAI = ({ assistantChatBoxVisibility, username, accessabilityTask, setAc
 
 
         })
-        const response = await axios.post("http://localhost:3000/api/v1/assistant", { task: finalTaskToSearch });
+        const response = await axios.post(`${import.meta.env.BACKEND_BASEURL}/api/v1/assistant`, { task: finalTaskToSearch });
         if (response.data.success === false) {
           toast.info(`${response.data.msg}`);
           setMessageList((prev) => {
             return [...prev, { type: 'assistant', reply: response.data.msg, success: false }]
           })
-          console.log(response.data.msg);
+          
         }
         else {
           setMessageList((prev) => {
@@ -64,13 +64,12 @@ const ChatAI = ({ assistantChatBoxVisibility, username, accessabilityTask, setAc
 
     } catch (error) {
       toast.error(`Something went wrong!`);
-      console.log(error);
+      
     }
   }
 
   const setAndMakeCall = async () => {
-    console.log(accessabilityTask.acc_taskCode)
-    console.log(accessabilityTask.acc_taskError)
+    
 
     let newTask = `I tried to run this code 
     //////
@@ -110,7 +109,7 @@ const ChatAI = ({ assistantChatBoxVisibility, username, accessabilityTask, setAc
 
   return (
 
-    <div className={`fixed ${assistantChatBoxVisibility ? `right-0 top-0` : `right-[-100rem] top-0 `}  h-full w-[35rem] lg:w-[35rem] md:w-[23rem] sm:w-[18rem] bg-gray-950 rounded shadow-[0px_0px_20px_rgba(0,0,0,1)] transition-all ease-in-out delay-3050`}>
+    <div className={`fixed ${assistantChatBoxVisibility ? `right-0 top-0` : `right-[-100rem] top-0 `}  h-full w-[90%] lg:w-[35rem] md:w-[30rem] sm:w-[22rem] bg-gray-950 rounded shadow-[0px_0px_20px_rgba(0,0,0,1)] transition-all ease-in-out delay-3050`}>
       <div id='upperChatDiv' className='w-full h-[calc(100%-10%)] bg-gray-950 p-4 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-webkit text-white flex-column'>
         <div className='px-2 py-1 rounded bg-gray-800 fixed'>
           <button onClick={clearChat}>Clear chat</button>

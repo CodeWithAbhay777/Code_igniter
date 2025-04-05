@@ -21,7 +21,7 @@ const Webrtc = ({ videoGrid, webrtcVisibility , myStream , screenWidthRef}) => {
 
         const interval = setInterval(() => {
             if (myStream.current) {
-                console.log("Stream is ready!");
+               
                 if (webcamState ){ 
                     setWebcamStatus(JSON.parse(webcamState));
                     const videoTrack = myStream.current.getVideoTracks()[0];
@@ -56,7 +56,7 @@ const Webrtc = ({ videoGrid, webrtcVisibility , myStream , screenWidthRef}) => {
             setMicStatus(audioTrack.enabled);
         }
         else {
-            console.log(myStream)
+           
         }
 
     }
@@ -68,14 +68,14 @@ const Webrtc = ({ videoGrid, webrtcVisibility , myStream , screenWidthRef}) => {
             setWebcamStatus(videoTrack.enabled);
         }
         else {
-            console.log(myStream)
+            
         }
 
     }
     return (
-        <motion.div drag whileDrag={{ scale: 1.2 }} dragConstraints={screenWidthRef} className={`absolute right-0 bottom-0 h-[25rem] w-[42em] p-4 bg-black text-white overflow-y-auto rounded-md scrollbar-thin scrollbar-webkit ${!webrtcVisibility ? 'invisible' : 'visible'}`}>
+        <motion.div drag whileDrag={{ scale: 1.2 }} dragConstraints={screenWidthRef} className={`absolute right-0 bottom-0 h-[13rem] w-[23rem] lg:h-[25rem] lg:w-[42rem] md:h-[22rem] md:w-[36rem] sm:h-[19rem] sm:w-[31rem] p-4 bg-black text-white overflow-y-auto rounded-md scrollbar-thin scrollbar-webkit ${!webrtcVisibility ? 'invisible' : 'visible'}`}>
             <div ref={videoGrid} className='flex h-full w-full flex-wrap items-center justify-center'></div>
-            <div className='fixed bottom-[1rem] right-[1rem] h-[4rem] w-[8rem] bg-gray-800 rounded-md opacity-50 hover:opacity-100 flex items-center justify-evenly text-2xl'>
+            <div className='fixed bottom-[1rem] right-[1rem] h-[3rem] w-[6rem] lg:h-[4rem] lg:w-[8rem] md:h-[3.5] md:w-[7rem] sm:h-[3rem] sm:w-[6rem] bg-gray-800 rounded-md opacity-50 hover:opacity-100 flex items-center justify-evenly text-2xl'>
 
                 {micStatus ? <FaMicrophone onClick={micStatusChange} /> : <BsFillMicMuteFill onClick={micStatusChange} />}
                 {webcamStatus ? <IoVideocam onClick={webcamStatusChange} /> : <IoVideocamOff onClick={webcamStatusChange} />}

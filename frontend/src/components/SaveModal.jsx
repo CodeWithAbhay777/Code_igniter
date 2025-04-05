@@ -3,7 +3,7 @@ import Editor from '@monaco-editor/react';
 import { RxCross2 } from "react-icons/rx";
 import { BiLoaderAlt } from "react-icons/bi";
 import { FaSave } from "react-icons/fa";
-import {  toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { saveCode } from '../util/saveCode_API';
 
@@ -38,13 +38,13 @@ const SaveModal = ({ codeSaveinfo, closeModal, setSavedRefresh }) => {
     return (
         <div className='fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-[100]'>
 
-            <div className='h-[26rem] w-[70rem] lg:w-[50rem] md:w-[28rem] sm:w-[24rem] bg-gray-900 rounded-lg shadow-[0px_0px_50px_rgba(0,0,0,1)] flex'>
-                <div className='h-full w-[22rem] flex flex-col'>
+            <div className='lg:h-[26rem] w-[92%] lg:w-[50rem] h-[90%] flex flex-col items-center overflow-y-auto overflow-x-hidden sm:w-[80%]  md:w-[90%] md:flex-row md:h-[26rem] md:overflow-hidden bg-gray-900 rounded-lg shadow-[0px_0px_50px_rgba(0,0,0,1)] scrollbar-thin scrollbar-webkit'>
+                <div className='h-fit md:h-full w-full md:w-1/2 flex flex-col'>
                     <div className='w-full my-1 py-1 px-5 text-2xl my-2 text-white flex justify-between items-center'>
                         <h1 >Save code</h1>
                         <RxCross2 className='text-2xl hover:text-red-500 cursor-pointer' onClick={closeModal} />
                     </div>
-                    <div id="input-area" className=' flex-grow px-6 py-2'>
+                    <div id="input-area" className=' flex-grow px-6 py-2 w-full'>
 
 
                         <h2 className='text-lg my-2 text-white'>title</h2>
@@ -64,11 +64,11 @@ const SaveModal = ({ codeSaveinfo, closeModal, setSavedRefresh }) => {
                     </div>
 
                 </div>
-                <div className='flex-grow h-full rounded-r-lg p-3'>
+                <div className='flex-grow h-[25rem] md:h-full w-full md:w-1/2 rounded-r-lg p-3'>
                     <Editor
                         height="100%"
                         theme="vs-dark"
-                        // onMount={focusing}
+                        
                         language={codeSaveinfo.languageValue}
                         value={codeSaveinfo.inputValue}
                         options={{

@@ -6,7 +6,7 @@ import CodeEditor from './CodeEditor';
 const ShowData = ({ setShowWindowState, showDataValues }) => {
   const IconComponent = getLanguageIcon(showDataValues.language);
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-[100] px-[15rem] py-10'>
+    <div className='fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-[100] p-2 sm:px-4 sm:py-4 lg:px-[15rem] md:py-6 lg:py-10 '>
 
       <div className='h-full w-full bg-black rounded-lg p-2 shadow-[0px_0px_50px_rgba(0,0,0,1)] flex flex-col items-center justify-between gap-2'>
         <div className='w-full h-[5rem] bg-gray-900 rounded-lg flex items-center justify-between p-4 gap-4'>
@@ -19,18 +19,18 @@ const ShowData = ({ setShowWindowState, showDataValues }) => {
 
           </div>
         </div>
-        <div className='flex-grow w-full h-full rounded-lg flex justify-evenly'>
-          <div className='h-full w-[49%]'>
-            <CodeEditor language={showDataValues.language} input={showDataValues.inputValue} readOnly={true}/>
+        <div className='flex-grow w-full rounded-lg flex flex-col lg:flex-row justify-evenly overflow-y-auto lg:overflow-hidden'>
+          <div className='h-full w-full lg:w-[49%]'>
+            <CodeEditor language={showDataValues.language} input={showDataValues.inputValue} readOnly={true} />
           </div>
-          <div className='w-[49%] h-full rounded-lg flex flex-col'>
-              <div className='p-2 w-1/3 flex items-center justify-center bg-gray-900 rounded-lg text-xl text-gray-300'>
-                {showDataValues.date}
-              </div>
-              <div className='w-full flex-grow max-h-[24rem] mt-2 p-1 overflow-y-auto text-white text-[1.2rem] scrollbar-thin scrollbar-webkit'>
+          <div id='note-section' className='h-full w-full lg:w-[49%] rounded-lg flex flex-col'>
+            <div className='p-2 mt-2 lg:mt-0 w-full md:w-1/3 flex items-center justify-center bg-gray-900 rounded-lg text-xl text-gray-300'>
+              {showDataValues.date}
+            </div>
+            <div className='w-full flex-grow max-h-[24rem] mt-2 p-1 overflow-y-auto text-white text-[1.2rem] scrollbar-thin scrollbar-webkit'>
 
-                  {showDataValues.note}
-              </div>
+              {showDataValues.note}
+            </div>
           </div>
         </div>
       </div>

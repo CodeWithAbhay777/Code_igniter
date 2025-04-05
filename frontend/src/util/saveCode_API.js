@@ -18,21 +18,21 @@ export const saveCode = async (language, code, title, note) => {
 
 
 
-        console.log("body ",body)
+       
 
 
         const config = token ? { headers: { Authorization: `goat ${token}` } } : {};
 
-        console.log(config);
+        
 
-        let response = await axios.post("http://localhost:3000/api/v1/codebase", body, config);
+        let response = await axios.post(`${import.meta.env.BACKEND_BASEURL}/api/v1/codebase`, body, config);
 
         if (response.data.success) {
             return response.data;
         }
 
     } catch (error) {
-        console.log(error.message);
+        
         return null;
     }
 

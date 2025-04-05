@@ -82,7 +82,7 @@ const Codebase = ({ codebaseVisibility, isLoggedIn, savedRefresh , setEditWindow
   }
 
   const setupForEdit = (val) => {
-    console.log(setSavedData)
+    
     
     if (val && isLoggedIn) {
 
@@ -123,7 +123,7 @@ const Codebase = ({ codebaseVisibility, isLoggedIn, savedRefresh , setEditWindow
   
 
   return (
-    <div className={`fixed flex flex-col items-center justify-evenly ${(codebaseVisibility && isLoggedIn) ? `right-0 top-0` : `right-[-100rem] top-0 `}  h-full w-[25rem] lg:w-[25rem] md:w-[20rem] sm:w-[18rem] bg-gray-950 rounded shadow-[0px_0px_20px_rgba(0,0,0,1)] transition-all ease-in-out delay-3050`}>
+    <div className={`fixed z-[2] flex flex-col items-center justify-evenly ${(codebaseVisibility && isLoggedIn) ? `right-0 top-0` : `right-[-100rem] top-0 `}  h-full w-[25rem] w-[92%] lg:w-[25rem] md:w-[20rem] sm:w-[18rem] bg-gray-950 rounded shadow-[0px_0px_20px_rgba(0,0,0,1)] transition-all ease-in-out delay-3050`}>
       <div id='upperDiv' className=' w-full h-[8rem] mt-2 bg-gray-950 p-2 flex flex-col items-center justify-between'>
 
         <input value={search} onChange={(e) => setSearch(e.target.value)} className='h-[3rem] w-full p-2 font-4xl border-[1px] border-white-500 bg-gray-950 rounded text-white' placeholder='Search by title' />

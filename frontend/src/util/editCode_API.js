@@ -18,23 +18,21 @@ export const editCodeSumbit = async (language, code, title, note , id , ownerId)
 
         }
 
-        console.log("id is ", id);
-
-        console.log("body ",body)
+       
 
 
         const config = token ? { headers: { Authorization: `goat ${token}` } } : {};
 
-        console.log(config);
+        
 
-        let response = await axios.put(`http://localhost:3000/api/v1/codebase/${id}`, body, config);
+        let response = await axios.put(`${import.meta.env.BACKEND_BASEURL}/api/v1/codebase/${id}`, body, config);
 
         if (response.data.success) {
             return response.data;
         }
 
     } catch (error) {
-        console.log(error.message);
+       
         return null;
     }
 

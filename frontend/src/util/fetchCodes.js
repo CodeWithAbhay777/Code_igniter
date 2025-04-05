@@ -12,7 +12,7 @@ const makeApiCall = async (search , currentPage ) => {
 
       
 
-        const response = await axios.get('http://localhost:3000/api/v1/codebase', {
+        const response = await axios.get(`${import.meta.env.BACKEND_BASEURL}/api/v1/codebase`, {
             params: { limit: 10, page: currentPage, search },
             headers: { Authorization: `goat ${token}` }
         });
@@ -28,7 +28,7 @@ const makeApiCall = async (search , currentPage ) => {
 
         
     } catch (error) {
-        console.log(error.message);
+    
         toast.error("Error : Try it later");
     }
 } 
@@ -45,7 +45,7 @@ export function useFetchCodes(dependencies, delay , search , currentPage , setCo
        
         const data = await makeApiCall(search , currentPage);
         if (data) {
-            console.log(data)
+            
             setCodeData(data.codeData);
             setTotal(data.total);
             setIsLoading(false);

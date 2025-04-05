@@ -46,7 +46,7 @@ router.get("/", authMiddleware, async (req, res) => {
         }
 
     } catch (error) {
-        console.log(error.message);
+        
         res.status(500).json({
             success: false,
             message: "Something went wrong",
@@ -136,7 +136,7 @@ router.put("/:id", authMiddleware ,async (req, res) => {
         }
 
     } catch (error) {
-        console.log(error.message);
+        
         res.status(500).json({
             success: false,
             message: "Something went wrong",
@@ -169,7 +169,7 @@ router.delete("/:id", async (req, res) => {
         }
 
     } catch (error) {
-        console.log(error.message);
+        
         res.status(500).json({
             success : false,
             message : "Something went wrong"

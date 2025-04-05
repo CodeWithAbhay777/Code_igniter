@@ -14,7 +14,7 @@ const openai = new OpenAI ({
 
 router.post('/assistant' , async (req , res) => {
     let {task} = req.body;
-    console.log(req.body);
+    
     messages.push({ "role": "user", "content": `${task}` });
 
     try {
@@ -36,7 +36,7 @@ router.post('/assistant' , async (req , res) => {
           }
 
     }catch (error) {
-        console.log(error.message);
+        
         res.status(500).send({success : false , msg : "Something went wrong!"});
     }
 })

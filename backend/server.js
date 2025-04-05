@@ -48,7 +48,7 @@ const openai = new OpenAI({
 
 const io = new Server(server,{
   cors: {
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
   },
  
@@ -70,18 +70,16 @@ io.on("connection", (socket) => {
   socket.on("join-room", (roomId, { id, username }) => {
 
     if (!rooms.roomId) rooms[roomId] = [];
-    // console.log("Before check : ", rooms);
 
-    // const existUser = rooms[roomId].find(user => user.username === username);
 
 
 
 
     
       rooms[roomId].push({ socketId: socket.id, username });
-      console.log("After check : ", rooms);
+     
       socket.join(roomId);
-      console.log(`User ${username} joined room: ${roomId} with Socket ID: ${socket.id}`);
+
       socket.to(roomId).emit("user-connected", { id, username });
 
     
@@ -92,7 +90,7 @@ io.on("connection", (socket) => {
 
 
     socket.on("chat-message", (username, message) => {
-      console.log(`USERNAME : ${username} , MESSAGE : ${message}`);
+     
       socket.to(roomId).emit("get-message", username, message);
     });
 
@@ -105,5 +103,5 @@ io.on("connection", (socket) => {
 });
 
 server.listen(3000, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running`);
 });

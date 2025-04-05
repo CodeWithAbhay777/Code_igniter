@@ -10,7 +10,7 @@ const Selectlanguage = ({language , newVal}) => {
 
             }
             }
-            className='bg-gray-800 h-[2.5rem] w-[12rem] rounded-md text-white p-1 hover:bg-gray-900 cursor-pointer'>
+            className='bg-gray-800 h-[2.2rem] w-[10rem] sm:h-[2.5rem] sm:w-[12rem] rounded-md text-white p-1 hover:bg-gray-900 cursor-pointer'>
             {languageSupport.map((val, i) => {
                 return <option key={i} value={val.language} >{val.language}&nbsp;&nbsp;&nbsp;{val.version}</option>
             })}
