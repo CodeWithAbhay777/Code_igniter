@@ -1,6 +1,7 @@
 
 import express from "express";
 import OpenAI from "openai";
+import { assistantLimit } from "../middlewares/ratelimiting.js";
 
 
 
@@ -12,7 +13,7 @@ const openai = new OpenAI ({
   apiKey : secretKey,
 });
 
-router.post('/assistant' , async (req , res) => {
+router.post('/assistant' , assistantLimit ,async (req , res) => {
     let {task} = req.body;
     
     messages.push({ "role": "user", "content": `${task}` });

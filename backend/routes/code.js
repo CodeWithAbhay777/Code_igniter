@@ -14,8 +14,6 @@ router.get("/", authMiddleware, async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const filterTitle = req.query.search?.toString() || "";
 
-       
-
         const skip = (page - 1) * limit;
 
         if (userID) {

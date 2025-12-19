@@ -16,6 +16,12 @@ function Entry() {
       setRoomId("");
       setUsername("");
       sessionStorage.removeItem("inRoom");
+      sessionStorage.removeItem("allMessageState");
+      sessionStorage.removeItem("camsWindowState");
+      sessionStorage.removeItem("inputValueState");
+      sessionStorage.removeItem("languageValueState");
+      sessionStorage.removeItem("micState");
+      sessionStorage.removeItem("webcamState");
     }
   },[]);
 

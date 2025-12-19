@@ -14,9 +14,12 @@ import cors from "cors";
 
 
 const app = express();
+
+
+
 const PORT = process.env.PORT || 3000;
 app.use(cors({
-  origin: "https://code-igniter-ftfo.vercel.app",
+  origin: process.env.CLIENT_URL,
   credentials: true,
 }
 
